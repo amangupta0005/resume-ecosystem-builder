@@ -1,0 +1,144 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ProjectStatus {
+  completed
+  in_progress @map("in-progress")
+}
+
+model Project {
+  id             String          @id @default(cuid())
+  title          String
+  description    String
+  techStack      String[]
+  status         ProjectStatus
+  githubUrl      String?
+  liveUrl        String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  bullets        Bullet[]
+  domains        ProjectDomain[]
+  resumeProjects ResumeProject[]
+}
+
+model Bullet {
+  id        String                 @id @default(cuid())
+  projectId String
+  text      String
+  order     Int
+  project   Project                @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  overrides ResumeBulletOverride[]
+
+  @@unique([projectId, order])
+}
+
+model Domain {
+  id            String          @id @default(cuid())
+  name          String          @unique
+  projects      ProjectDomain[]
+  resumeConfigs ResumeConfig[]
+}
+
+model ProjectDomain {
+  projectId String
+  domainId  String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  domain    Domain  @relation(fields: [domainId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, domainId])
+}
+
+model ResumeConfig {
+  id              String                 @id @default(cuid())
+  domainId        String                 @unique
+  domain          Domain                 @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  
+  title           String?
+  summary         String?
+  skills          Json?
+
+  projects        ResumeProject[]
+  bulletOverrides ResumeBulletOverride[]
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+}
+
+model ResumeProject {
+  id             String       @id @default(cuid())
+  resumeConfigId String
+  projectId      String
+  included       Boolean      @default(true)
+  order          Int
+  resumeConfig   ResumeConfig @relation(fields: [resumeConfigId], references: [id], onDelete: Cascade)
+  project        Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([resumeConfigId, projectId])
+  @@unique([resumeConfigId, order])
+}
+
+model ResumeBulletOverride {
+  id             String       @id @default(cuid())
+  resumeConfigId String
+  bulletId       String
+  text           String
+  resumeConfig   ResumeConfig @relation(fields: [resumeConfigId], references: [id], onDelete: Cascade)
+  bullet         Bullet       @relation(fields: [bulletId], references: [id], onDelete: Cascade)
+
+  @@unique([resumeConfigId, bulletId])
+}
+
+model Profile {
+  id             String          @id @default(cuid())
+  fullName       String
+  email          String
+  phone          String?
+  location       String?
+  websiteUrl     String?
+  githubUrl      String?
+  linkedinUrl    String?
+  summary        String?
+  languages      String[]        @default([])
+  frameworks     String[]        @default([])
+  tools          String[]        @default([])
+  strengths      String[]        @default([])
+  educations     Education[]
+  certifications Certification[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+model Education {
+  id           String   @id @default(cuid())
+  profileId    String
+  institution  String
+  degree       String
+  fieldOfStudy String?
+  startDate    String?
+  endDate      String?
+  grade        String?
+  order        Int      @default(0)
+  profile      Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+model Certification {
+  id            String   @id @default(cuid())
+  profileId     String
+  name          String
+  issuer        String
+  issueDate     String?
+  credentialUrl String?
+  order         Int      @default(0)
+  profile       Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
