@@ -176,3 +176,52 @@ export async function revertBulletOverrideAction(
     return { success: false, message: "Failed to revert bullet to master." };
   }
 }
+
+export async function duplicateResumeConfigAction(
+  sourceConfigId: string,
+  newVariantName: string
+): Promise<{ success: boolean; newConfigId?: string; message?: string }> {
+  try {
+    const sourceConfig = await prisma.resumeConfig.findUnique({
+      where: { id: sourceConfigId },
+      include: {
+        projects: true,
+        bulletOverrides: true,
+      },
+    });
+
+    if (!sourceConfig) {
+      return { success: false, message: "Source resume config not found." };
+    }
+
+    const newConfig = await prisma.resumeConfig.create({
+      data: {
+        domainId: sourceConfig.domainId,
+        variantName: newVariantName,
+        isDefault: false,
+        title: sourceConfig.title,
+        summary: sourceConfig.summary,
+        skills: sourceConfig.skills ?? undefined,
+        projects: {
+          create: sourceConfig.projects.map((p) => ({
+            projectId: p.projectId,
+            included: p.included,
+            order: p.order,
+          })),
+        },
+        bulletOverrides: {
+          create: sourceConfig.bulletOverrides.map((bo) => ({
+            bulletId: bo.bulletId,
+            text: bo.text,
+          })),
+        },
+      },
+    });
+
+    revalidatePath("/resumes", "layout");
+    return { success: true, newConfigId: newConfig.id };
+  } catch (error) {
+    console.error("Failed to duplicate resume config:", error);
+    return { success: false, message: "Failed to duplicate resume variant." };
+  }
+}

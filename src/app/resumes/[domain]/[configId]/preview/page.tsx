@@ -8,6 +8,7 @@ export const dynamic = "force-dynamic";
 type PreviewPageProps = {
   params: {
     domain: string;
+    configId: string;
   };
 };
 
@@ -18,7 +19,7 @@ export default async function ResumePreviewPage({ params }: PreviewPageProps) {
     notFound();
   }
 
-  const documentData = await getResumeDocumentData(domainName);
+  const documentData = await getResumeDocumentData(domainName, params.configId);
 
   return (
     <div className="space-y-6">

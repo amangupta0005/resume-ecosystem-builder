@@ -62,8 +62,11 @@ model ProjectDomain {
 
 model ResumeConfig {
   id              String                 @id @default(cuid())
-  domainId        String                 @unique
+  domainId        String
   domain          Domain                 @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  
+  variantName     String                 @default("Default")
+  isDefault       Boolean                @default(false)
   
   title           String?
   summary         String?

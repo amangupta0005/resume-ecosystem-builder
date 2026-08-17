@@ -1,39 +1,19 @@
-import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import { slugToDomain } from "@/lib/constants/domains";
-import {
-  getDomainResumesOverview,
-  getResumeConfigData,
-} from "@/features/resumes/server/queries";
-import { DomainTabs } from "@/features/resumes/components/DomainTabs";
-import { ResumeConfigManager } from "@/features/resumes/components/ResumeConfigManager";
+import { getResumeConfigData } from "@/features/resumes/server/queries";
 
-export const dynamic = "force-dynamic";
-
-type ResumeDomainPageProps = {
-  params: {
-    domain: string;
-  };
-};
-
-export default async function ResumeDomainPage({ params }: ResumeDomainPageProps) {
+export default async function DomainResumeRedirect({
+  params,
+}: {
+  params: { domain: string };
+}) {
   const domainName = slugToDomain(params.domain);
-
   if (!domainName) {
-    notFound();
+    return <div className="p-8 text-red-500">Invalid Domain</div>;
   }
 
-  const [overviewItems, configData] = await Promise.all([
-    getDomainResumesOverview(),
-    getResumeConfigData(domainName),
-  ]);
-
-  return (
-    <div className="space-y-6">
-      <DomainTabs
-        currentDomain={domainName}
-        overviewItems={overviewItems}
-      />
-      <ResumeConfigManager configData={configData} />
-    </div>
-  );
+  const configData = await getResumeConfigData(domainName);
+  
+  // Redirect to the default config's URL
+  redirect(`/resumes/${params.domain}/${configData.resumeConfigId}`);
 }

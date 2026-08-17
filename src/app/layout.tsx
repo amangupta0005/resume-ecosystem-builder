@@ -58,6 +58,12 @@ export default function RootLayout({
                 Domain Resumes
               </Link>
               <Link
+                href="/links"
+                className="rounded-md px-3 py-1.5 text-sm font-medium text-blue-600 transition hover:bg-blue-50"
+              >
+                Mobile Hub
+              </Link>
+              <Link
                 href="/resumes/compare"
                 className="rounded-md px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 hover:text-slate-950"
               >

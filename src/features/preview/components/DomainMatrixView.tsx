@@ -76,14 +76,7 @@ export function DomainMatrixView({ matrixData }: DomainMatrixViewProps) {
                   href={`/resumes/${stats.slug}`}
                   className="flex-1 text-center rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition"
                 >
-                  Configure
-                </Link>
-                <Link
-                  href={`/resumes/${stats.slug}/preview`}
-                  className="flex-1 text-center rounded-lg bg-slate-900 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 transition inline-flex items-center justify-center gap-1"
-                >
-                  <span>Preview</span>
-                  <ExternalLink size={12} />
+                  Configure Domain & Variants
                 </Link>
               </div>
             </div>

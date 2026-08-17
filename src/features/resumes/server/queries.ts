@@ -42,6 +42,12 @@ export type DomainResumeOverviewItem = {
   overrideCount: number;
 };
 
+export type ResumeVariantItem = {
+  id: string;
+  variantName: string;
+  isDefault: boolean;
+};
+
 export async function getDomainResumesOverview(): Promise<DomainResumeOverviewItem[]> {
   const domains = await prisma.domain.findMany({
     include: {
@@ -71,7 +77,23 @@ export async function getDomainResumesOverview(): Promise<DomainResumeOverviewIt
   });
 }
 
-export async function getResumeConfigData(domainName: DomainName): Promise<ResumeConfigData> {
+export async function getDomainVariants(domainName: DomainName): Promise<ResumeVariantItem[]> {
+  const domain = await prisma.domain.findUnique({
+    where: { name: domainName },
+    include: {
+      resumeConfigs: {
+        select: { id: true, variantName: true, isDefault: true },
+        orderBy: { isDefault: "desc" },
+      },
+    },
+  });
+  return domain?.resumeConfigs ?? [];
+}
+
+export async function getResumeConfigData(
+  domainName: DomainName,
+  configId?: string
+): Promise<ResumeConfigData> {
   // 1. Ensure Domain exists
   let domain = await prisma.domain.findUnique({
     where: { name: domainName },
@@ -84,13 +106,34 @@ export async function getResumeConfigData(domainName: DomainName): Promise<Resum
   }
 
   // 2. Ensure ResumeConfig exists
-  let resumeConfig = await prisma.resumeConfig.findUnique({
-    where: { domainId: domain.id },
-  });
+  let resumeConfig = null;
+  
+  if (configId) {
+    resumeConfig = await prisma.resumeConfig.findUnique({
+      where: { id: configId },
+    });
+    if (!resumeConfig) {
+      const { notFound } = require("next/navigation");
+      notFound();
+    }
+  } else {
+    resumeConfig = await prisma.resumeConfig.findFirst({
+      where: { domainId: domain.id, isDefault: true },
+    });
+    if (!resumeConfig) {
+      resumeConfig = await prisma.resumeConfig.findFirst({
+        where: { domainId: domain.id },
+      });
+    }
+  }
 
   if (!resumeConfig) {
     resumeConfig = await prisma.resumeConfig.create({
-      data: { domainId: domain.id },
+      data: { 
+        domainId: domain.id,
+        variantName: "Default",
+        isDefault: true
+      },
     });
   }
 

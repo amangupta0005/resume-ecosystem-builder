@@ -2,20 +2,25 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Search, SlidersHorizontal, ListFilter, ExternalLink } from "lucide-react";
-import type { ResumeConfigData, ResumeProjectData } from "@/features/resumes/server/queries";
+import type { ResumeConfigData, ResumeProjectData, ResumeVariantItem } from "@/features/resumes/server/queries";
 import {
   toggleProjectInclusionAction,
   reorderResumeProjectsAction,
+  duplicateResumeConfigAction,
 } from "@/features/resumes/server/actions";
 import { ResumeProjectCard } from "./ResumeProjectCard";
 import { ResumePreviewPanel } from "./ResumePreviewPanel";
 
 type ResumeConfigManagerProps = {
   configData: ResumeConfigData;
+  variants: ResumeVariantItem[];
 };
 
-export function ResumeConfigManager({ configData }: ResumeConfigManagerProps) {
+export function ResumeConfigManager({ configData, variants }: ResumeConfigManagerProps) {
+  const router = useRouter();
+  const [isDuplicating, setIsDuplicating] = useState(false);
   const [projects, setProjects] = useState<ResumeProjectData[]>(configData.projects);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterMode, setFilterMode] = useState<"all" | "included" | "domain-only">("included");
@@ -139,14 +144,49 @@ export function ResumeConfigManager({ configData }: ResumeConfigManagerProps) {
     );
   }
 
+  async function handleDuplicate() {
+    const name = prompt("Enter a name for the new variant:");
+    if (!name) return;
+    
+    setIsDuplicating(true);
+    const result = await duplicateResumeConfigAction(configData.resumeConfigId, name);
+    setIsDuplicating(false);
+    
+    if (result.success && result.newConfigId) {
+      router.push(`/resumes/${configData.domainSlug}/${result.newConfigId}`);
+    } else {
+      alert(result.message || "Failed to duplicate");
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Top Header & Quick Statistics */}
       <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-950">
-            {configData.domainName} Resume
-          </h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-950">
+              {configData.domainName} Resume
+            </h1>
+            <select
+              value={configData.resumeConfigId}
+              onChange={(e) => router.push(`/resumes/${configData.domainSlug}/${e.target.value}`)}
+              className="rounded-md border border-slate-300 text-sm py-1 pl-2 pr-8 focus:ring-1 focus:ring-slate-500"
+            >
+              {variants.map(v => (
+                <option key={v.id} value={v.id}>
+                  {v.variantName} {v.isDefault ? "(Default)" : ""}
+                </option>
+              ))}
+            </select>
+            <button
+              onClick={handleDuplicate}
+              disabled={isDuplicating}
+              className="rounded-md bg-slate-100 hover:bg-slate-200 px-3 py-1 text-sm font-medium text-slate-700 transition disabled:opacity-50 cursor-pointer"
+            >
+              {isDuplicating ? "Copying..." : "Duplicate Variant"}
+            </button>
+          </div>
           <p className="mt-1 text-sm text-slate-600">
             Configure included projects, order, and per-bullet customizations for this domain.
           </p>
@@ -161,7 +201,7 @@ export function ResumeConfigManager({ configData }: ResumeConfigManagerProps) {
             <span>{totalOverrides}</span> customized bullets
           </div>
           <Link
-            href={`/resumes/${configData.domainSlug}/preview`}
+            href={`/resumes/${configData.domainSlug}/${configData.resumeConfigId}/preview`}
             className="inline-flex items-center gap-1.5 rounded-lg bg-slate-950 px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-slate-800 transition"
           >
             <span>Full ATS Preview</span>
@@ -269,6 +309,7 @@ export function ResumeConfigManager({ configData }: ResumeConfigManagerProps) {
         {/* Right Column: Sticky Live Preview */}
         <div className="lg:sticky lg:top-24 lg:self-start">
           <ResumePreviewPanel
+            resumeConfigId={configData.resumeConfigId}
             domainName={configData.domainName}
             includedProjects={includedProjects}
             overrideCount={totalOverrides}

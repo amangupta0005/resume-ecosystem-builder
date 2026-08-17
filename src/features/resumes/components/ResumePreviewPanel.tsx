@@ -7,12 +7,14 @@ import { domainToSlug, type DomainName } from "@/lib/constants/domains";
 import type { ResumeProjectData } from "@/features/resumes/server/queries";
 
 type ResumePreviewPanelProps = {
+  resumeConfigId: string;
   domainName: DomainName;
   includedProjects: ResumeProjectData[];
   overrideCount: number;
 };
 
 export function ResumePreviewPanel({
+  resumeConfigId,
   domainName,
   includedProjects,
   overrideCount,
@@ -133,7 +135,7 @@ export function ResumePreviewPanel({
 
       {/* Full Preview Page Button */}
       <Link
-        href={`/resumes/${slug}/preview`}
+        href={`/resumes/${slug}/${resumeConfigId}/preview`}
         className="flex items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-slate-800 transition w-full"
       >
         <span>Open Full ATS Sheet & PDF Export</span>

@@ -246,7 +246,7 @@ export function ExportBar({ documentData, isModified = false }: ExportBarProps) 
       <div className="flex flex-wrap items-center justify-between gap-3">
         {/* Navigation back */}
         <Link
-          href={`/resumes/${documentData.domainSlug}`}
+          href={`/resumes/${documentData.domainSlug}/${documentData.resumeConfigId}`}
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-slate-950 transition"
         >
           <ArrowLeft size={14} />

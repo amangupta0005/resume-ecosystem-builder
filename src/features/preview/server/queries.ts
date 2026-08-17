@@ -70,6 +70,7 @@ export type ResumeDocumentProject = {
 };
 
 export type ResumeDocumentData = {
+  resumeConfigId: string;
   domainName: DomainName;
   domainSlug: string;
   profile: ProfileData;
@@ -214,33 +215,44 @@ export function analyzeAtsCompliance(
 
 export async function getResumeDocumentData(
   domainName: DomainName,
+  configId?: string
 ): Promise<ResumeDocumentData> {
-  const [domain, profile] = await Promise.all([
-    prisma.domain.findUnique({
-      where: { name: domainName },
+  const profile = await getProfileData();
+  
+  const includeQuery = {
+    projects: {
+      where: { included: true },
+      orderBy: { order: "asc" } as any,
       include: {
-        resumeConfigs: {
+        project: {
           include: {
-            projects: {
-              where: { included: true },
-              orderBy: { order: "asc" },
-              include: {
-                project: {
-                  include: {
-                    bullets: { orderBy: { order: "asc" } },
-                  },
-                },
-              },
-            },
-            bulletOverrides: true,
+            bullets: { orderBy: { order: "asc" } as any },
           },
         },
       },
-    }),
-    getProfileData(),
-  ]);
+    },
+    bulletOverrides: true,
+  };
 
-  const resumeConfig = domain?.resumeConfigs[0];
+  let resumeConfig = null;
+  if (configId) {
+    resumeConfig = await prisma.resumeConfig.findUnique({
+      where: { id: configId },
+      include: includeQuery,
+    });
+  } else {
+    resumeConfig = await prisma.resumeConfig.findFirst({
+      where: { domain: { name: domainName }, isDefault: true },
+      include: includeQuery,
+    });
+    if (!resumeConfig) {
+      resumeConfig = await prisma.resumeConfig.findFirst({
+        where: { domain: { name: domainName } },
+        include: includeQuery,
+      });
+    }
+  }
+
   const overrides = resumeConfig?.bulletOverrides ?? [];
   const overrideMap = new Map<string, string>();
   for (const ov of overrides) {
@@ -293,6 +305,7 @@ export async function getResumeDocumentData(
     : null;
 
   return {
+    resumeConfigId: resumeConfig.id,
     domainName,
     domainSlug: domainToSlug(domainName),
     profile,
