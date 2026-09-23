@@ -10,9 +10,11 @@ import {
   Layers,
   Eye,
   Cpu,
-  ExternalLink,
+  Globe,
+  FileCheck2,
+  Building2,
 } from "lucide-react";
-import { DOMAIN_NAMES, type DomainName } from "@/lib/constants/domains";
+import { DOMAIN_NAMES, domainToSlug, type DomainName } from "@/lib/constants/domains";
 import type { MatrixData } from "@/features/preview/server/queries";
 
 type DomainMatrixViewProps = {
@@ -21,6 +23,8 @@ type DomainMatrixViewProps = {
 
 function renderDomainIcon(domain: DomainName) {
   switch (domain) {
+    case "All Domains":
+      return <Globe size={16} className="text-slate-600" />;
     case "AI/ML":
       return <Sparkles size={16} className="text-purple-500" />;
     case "Full-Stack":
@@ -29,6 +33,10 @@ function renderDomainIcon(domain: DomainName) {
       return <Eye size={16} className="text-emerald-500" />;
     case "IoT+ML":
       return <Cpu size={16} className="text-amber-500" />;
+    case "AI Content Evaluation":
+      return <FileCheck2 size={16} className="text-cyan-500" />;
+    case "Company Full-Stack":
+      return <Building2 size={16} className="text-indigo-500" />;
     default:
       return null;
   }
@@ -47,7 +55,11 @@ export function DomainMatrixView({ matrixData }: DomainMatrixViewProps) {
       {/* Header Domain Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {DOMAIN_NAMES.map((dName) => {
-          const stats = matrixData.domainCounts[dName];
+          const stats = matrixData.domainCounts[dName] ?? {
+            includedProjects: 0,
+            overridesCount: 0,
+            slug: domainToSlug(dName),
+          };
 
           return (
             <div

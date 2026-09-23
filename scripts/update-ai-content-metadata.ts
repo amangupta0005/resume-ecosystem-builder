@@ -32,8 +32,16 @@ async function main() {
     }
   ];
 
-  await prisma.resumeConfig.update({
+  const resumeConfig = await prisma.resumeConfig.findFirst({
     where: { domainId: domain.id },
+  });
+
+  if (!resumeConfig) {
+    throw new Error(`ResumeConfig for domain ${domainName} not found`);
+  }
+
+  await prisma.resumeConfig.update({
+    where: { id: resumeConfig.id },
     data: {
       title,
       summary,

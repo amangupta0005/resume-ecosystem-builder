@@ -41,3 +41,7 @@ next-env.d.ts
 # resumes and personal exports
 /exports/
 *.docx
+
+.vercel
+
+scratch/

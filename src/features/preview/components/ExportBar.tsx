@@ -4,13 +4,24 @@ import { useState } from "react";
 import Link from "next/link";
 import { Printer, Copy, Check, Download, ArrowLeft, FileDown, Loader2 } from "lucide-react";
 import type { ResumeDocumentData } from "@/features/preview/server/queries";
+import { ThemeSelector } from "@/components/ThemeSelector";
+import type { ResumeThemeId } from "@/lib/resumeThemes";
 
 type ExportBarProps = {
   documentData: ResumeDocumentData;
   isModified?: boolean;
+  currentTheme?: ResumeThemeId;
+  onSelectTheme?: (themeId: ResumeThemeId) => void;
+  onPrintPdf?: () => void;
 };
 
-export function ExportBar({ documentData, isModified = false }: ExportBarProps) {
+export function ExportBar({
+  documentData,
+  isModified = false,
+  currentTheme = "slate",
+  onSelectTheme,
+  onPrintPdf,
+}: ExportBarProps) {
   const [copiedType, setCopiedType] = useState<"markdown" | "text" | null>(null);
   const [isExportingDocx, setIsExportingDocx] = useState(false);
   const { profile, domainName, projects, aggregatedSkills } = documentData;
@@ -244,14 +255,25 @@ export function ExportBar({ documentData, isModified = false }: ExportBarProps) 
   return (
     <div className="print:hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        {/* Navigation back */}
-        <Link
-          href={`/resumes/${documentData.domainSlug}/${documentData.resumeConfigId}`}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-slate-950 transition"
-        >
-          <ArrowLeft size={14} />
-          <span>Back to Configurator</span>
-        </Link>
+        {/* Navigation back & Theme Switcher */}
+        <div className="flex flex-wrap items-center gap-4">
+          <Link
+            href={`/resumes/${documentData.domainSlug}/${documentData.resumeConfigId}`}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-slate-950 transition"
+          >
+            <ArrowLeft size={14} />
+            <span>Back to Configurator</span>
+          </Link>
+
+          {onSelectTheme && (
+            <div className="border-l border-slate-200 pl-3">
+              <ThemeSelector
+                currentTheme={currentTheme}
+                onSelectTheme={onSelectTheme}
+              />
+            </div>
+          )}
+        </div>
 
         {/* Action Buttons */}
         <div className="flex flex-wrap items-center gap-2">
@@ -276,14 +298,14 @@ export function ExportBar({ documentData, isModified = false }: ExportBarProps) 
             </span>
           </button>
 
-          {/* Print PDF */}
+          {/* Print to PDF (Client-Side) */}
           <button
             type="button"
-            onClick={handlePrint}
+            onClick={onPrintPdf ?? handlePrint}
             className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3.5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-slate-800 transition"
           >
             <Printer size={14} />
-            <span>Print to PDF</span>
+            <span>Export to PDF</span>
           </button>
 
           {/* Copy Markdown */}

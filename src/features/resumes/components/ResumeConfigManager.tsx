@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useEffect, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Search, SlidersHorizontal, ListFilter, ExternalLink } from "lucide-react";
+import { DragDropContext, Droppable, Draggable, type DropResult } from "@hello-pangea/dnd";
 import type { ResumeConfigData, ResumeProjectData, ResumeVariantItem } from "@/features/resumes/server/queries";
 import {
   toggleProjectInclusionAction,
@@ -24,7 +25,12 @@ export function ResumeConfigManager({ configData, variants }: ResumeConfigManage
   const [projects, setProjects] = useState<ResumeProjectData[]>(configData.projects);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterMode, setFilterMode] = useState<"all" | "included" | "domain-only">("included");
+  const [isMounted, setIsMounted] = useState(false);
   const [, startTransition] = useTransition();
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const includedProjects = projects.filter((p) => p.included);
   const totalOverrides = projects.reduce(
@@ -112,6 +118,71 @@ export function ResumeConfigManager({ configData, variants }: ResumeConfigManage
         configData.resumeConfigId,
         newIncludedIds,
       );
+    });
+  }
+
+  // Drag-and-drop reorder handler
+  function handleDragEnd(result: DropResult) {
+    if (!result.destination) return;
+    const sourceIndex = result.source.index;
+    const destIndex = result.destination.index;
+    if (sourceIndex === destIndex) return;
+
+    const currentIncluded = [...includedProjects];
+    const [movedProject] = currentIncluded.splice(sourceIndex, 1);
+    if (!movedProject) return;
+    currentIncluded.splice(destIndex, 0, movedProject);
+
+    const newIncludedIds = currentIncluded.map((p) => p.id);
+    const nonIncludedProjects = projects.filter((p) => !p.included);
+
+    const reorderedIncluded = currentIncluded.map((p, idx) => ({
+      ...p,
+      order: idx,
+    }));
+
+    const nextProjects = [...reorderedIncluded, ...nonIncludedProjects];
+    setProjects(nextProjects);
+
+    startTransition(async () => {
+      await reorderResumeProjectsAction(
+        configData.resumeConfigId,
+        newIncludedIds,
+      );
+    });
+  }
+
+  function handleSwapProject(includedProjectId: string, excludedProjectId: string) {
+    const currentIncludedIds = includedProjects.map((p) => p.id);
+    const index = currentIncludedIds.indexOf(includedProjectId);
+    if (index === -1) return;
+    
+    currentIncludedIds[index] = excludedProjectId;
+
+    setProjects((prev) => {
+      const updated = prev.map((p) => {
+        if (p.id === includedProjectId) return { ...p, included: false };
+        if (p.id === excludedProjectId) return { ...p, included: true };
+        return p;
+      });
+      
+      return updated.map(p => {
+        if (p.included) {
+           return { ...p, order: currentIncludedIds.indexOf(p.id) };
+        }
+        return { ...p, order: 0 };
+      }).sort((a, b) => {
+        if (a.included && b.included) return a.order - b.order;
+        if (a.included) return -1;
+        if (b.included) return 1;
+        return 0;
+      });
+    });
+
+    startTransition(async () => {
+      await toggleProjectInclusionAction(configData.resumeConfigId, includedProjectId, false);
+      await toggleProjectInclusionAction(configData.resumeConfigId, excludedProjectId, true);
+      await reorderResumeProjectsAction(configData.resumeConfigId, currentIncludedIds);
     });
   }
 
@@ -283,25 +354,99 @@ export function ResumeConfigManager({ configData, variants }: ResumeConfigManage
             </div>
           ) : (
             <div className="space-y-3">
-              {filteredProjects.map((project) => {
-                const includedIndex = includedProjects.findIndex(
-                  (p) => p.id === project.id,
-                );
+              {filterMode === "included" && !searchQuery && includedProjects.length > 1 && (
+                <div className="flex items-center justify-between px-1 text-[11px] text-slate-500">
+                  <span>💡 Drag the grip handle on any project card to reorder, or use the arrow buttons.</span>
+                  <span>{includedProjects.length} projects</span>
+                </div>
+              )}
 
-                return (
-                  <ResumeProjectCard
-                    key={project.id}
-                    resumeConfigId={configData.resumeConfigId}
-                    domainName={configData.domainName}
-                    project={project}
-                    index={includedIndex >= 0 ? includedIndex : 0}
-                    totalIncluded={includedProjects.length}
-                    onToggleInclusion={handleToggleInclusion}
-                    onMoveOrder={handleMoveOrder}
-                    onBulletUpdated={handleBulletUpdated}
-                  />
-                );
-              })}
+              {isMounted ? (
+                <DragDropContext onDragEnd={handleDragEnd}>
+                  <Droppable
+                    droppableId="resume-projects-droppable"
+                    isDropDisabled={filterMode !== "included" || Boolean(searchQuery)}
+                  >
+                    {(provided) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                        className="space-y-3"
+                      >
+                        {filteredProjects.map((project) => {
+                          const includedIndex = includedProjects.findIndex(
+                            (p) => p.id === project.id,
+                          );
+                          const isDraggable =
+                            project.included && filterMode === "included" && !searchQuery;
+
+                          return (
+                            <Draggable
+                              key={project.id}
+                              draggableId={project.id}
+                              index={includedIndex >= 0 ? includedIndex : 0}
+                              isDragDisabled={!isDraggable}
+                            >
+                              {(dragProvided, snapshot) => (
+                                <div
+                                  ref={dragProvided.innerRef}
+                                  {...dragProvided.draggableProps}
+                                  className={
+                                    snapshot.isDragging
+                                      ? "opacity-95 shadow-2xl ring-2 ring-slate-900 rounded-lg transition-shadow"
+                                      : ""
+                                  }
+                                >
+                                  <ResumeProjectCard
+                                    resumeConfigId={configData.resumeConfigId}
+                                    domainName={configData.domainName}
+                                    project={project}
+                                    index={includedIndex >= 0 ? includedIndex : 0}
+                                    totalIncluded={includedProjects.length}
+                                    onToggleInclusion={handleToggleInclusion}
+                                    onMoveOrder={handleMoveOrder}
+                                    onBulletUpdated={handleBulletUpdated}
+                                    excludedProjects={projects.filter((p) => !p.included)}
+                                    onSwapProject={handleSwapProject}
+                                    dragHandleProps={
+                                      isDraggable ? dragProvided.dragHandleProps : null
+                                    }
+                                  />
+                                </div>
+                              )}
+                            </Draggable>
+                          );
+                        })}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                </DragDropContext>
+              ) : (
+                <div className="space-y-3">
+                  {filteredProjects.map((project) => {
+                    const includedIndex = includedProjects.findIndex(
+                      (p) => p.id === project.id,
+                    );
+
+                    return (
+                      <ResumeProjectCard
+                        key={project.id}
+                        resumeConfigId={configData.resumeConfigId}
+                        domainName={configData.domainName}
+                        project={project}
+                        index={includedIndex >= 0 ? includedIndex : 0}
+                        totalIncluded={includedProjects.length}
+                        onToggleInclusion={handleToggleInclusion}
+                        onMoveOrder={handleMoveOrder}
+                        onBulletUpdated={handleBulletUpdated}
+                        excludedProjects={projects.filter((p) => !p.included)}
+                        onSwapProject={handleSwapProject}
+                      />
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
         </div>

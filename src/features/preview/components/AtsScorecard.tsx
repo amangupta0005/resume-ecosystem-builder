@@ -1,18 +1,22 @@
 "use client";
 
-import { CheckCircle2, AlertTriangle, Sparkles, FileText, HelpCircle } from "lucide-react";
+import { CheckCircle2, AlertTriangle, Sparkles, FileText, HelpCircle, Zap } from "lucide-react";
 import type { AtsAnalysisResult } from "@/features/preview/server/queries";
 
 type AtsScorecardProps = {
   analysis: AtsAnalysisResult;
   highlightOverrides: boolean;
   onToggleHighlight: () => void;
+  highlightAtsKeywords?: boolean;
+  onToggleAtsKeywords?: () => void;
 };
 
 export function AtsScorecard({
   analysis,
   highlightOverrides,
   onToggleHighlight,
+  highlightAtsKeywords = false,
+  onToggleAtsKeywords,
 }: AtsScorecardProps) {
   const getScoreColor = (score: number) => {
     if (score >= 85) return "text-emerald-600 bg-emerald-50 border-emerald-200";
@@ -142,27 +146,51 @@ export function AtsScorecard({
         )}
       </div>
 
-      {/* Highlighter Toggle */}
-      <div className="border-t border-slate-100 pt-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Sparkles size={14} className="text-purple-600" />
-          <span className="text-xs text-slate-700 font-medium">
-            Highlight domain overrides in preview
-          </span>
-        </div>
-        <button
-          type="button"
-          onClick={onToggleHighlight}
-          className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-            highlightOverrides ? "bg-purple-600" : "bg-slate-300"
-          }`}
-        >
-          <span
-            className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-              highlightOverrides ? "translate-x-4" : "translate-x-0"
+      {/* Highlighter Toggles */}
+      <div className="border-t border-slate-100 pt-3 space-y-2.5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Zap size={14} className="text-emerald-600 fill-emerald-500" />
+            <span className="text-xs text-slate-700 font-medium">
+              Highlight ATS Action Verbs & Tech
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={onToggleAtsKeywords}
+            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+              highlightAtsKeywords ? "bg-emerald-600" : "bg-slate-300"
             }`}
-          />
-        </button>
+          >
+            <span
+              className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                highlightAtsKeywords ? "translate-x-4" : "translate-x-0"
+              }`}
+            />
+          </button>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Sparkles size={14} className="text-purple-600" />
+            <span className="text-xs text-slate-700 font-medium">
+              Highlight domain overrides
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={onToggleHighlight}
+            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+              highlightOverrides ? "bg-purple-600" : "bg-slate-300"
+            }`}
+          >
+            <span
+              className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                highlightOverrides ? "translate-x-4" : "translate-x-0"
+              }`}
+            />
+          </button>
+        </div>
       </div>
     </div>
   );

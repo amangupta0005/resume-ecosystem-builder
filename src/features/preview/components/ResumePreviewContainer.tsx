@@ -1,14 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   Columns2,
   FileText,
   Code2,
   Sparkles,
 } from "lucide-react";
+import { useReactToPrint } from "react-to-print";
 import type { ResumeDocumentData } from "@/features/preview/server/queries";
 import { analyzeAtsCompliance } from "@/features/preview/server/queries";
+import type { ResumeThemeId } from "@/lib/resumeThemes";
 import { ExportBar } from "./ExportBar";
 import { AtsScorecard } from "./AtsScorecard";
 import { FullResumeDocument } from "./FullResumeDocument";
@@ -25,8 +27,29 @@ export function ResumePreviewContainer({
 }: ResumePreviewContainerProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("split");
   const [highlightOverrides, setHighlightOverrides] = useState(true);
+  const [highlightAtsKeywords, setHighlightAtsKeywords] = useState(true);
+  const [currentTheme, setCurrentTheme] = useState<ResumeThemeId>("slate");
   const [liveDocData, setLiveDocData] = useState<ResumeDocumentData>(initialDocumentData);
   const [isModified, setIsModified] = useState(false);
+  const resumeRef = useRef<HTMLDivElement>(null);
+
+  // Client-Side PDF Generation hook
+  const handlePrintPdf = useReactToPrint({
+    contentRef: resumeRef,
+    documentTitle: `${liveDocData.domainSlug || "resume"}_ATS_Resume`,
+    pageStyle: `
+      @page {
+        size: letter;
+        margin: 10mm 12mm;
+      }
+      @media print {
+        body {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+      }
+    `,
+  });
 
   // Live ATS analysis computed on the fly as liveDocData changes
   const currentAtsAnalysis = analyzeAtsCompliance(liveDocData.projects);
@@ -44,7 +67,13 @@ export function ResumePreviewContainer({
   return (
     <div className="space-y-6">
       {/* Top Action & Navigation Bar */}
-      <ExportBar documentData={liveDocData} isModified={isModified} />
+      <ExportBar
+        documentData={liveDocData}
+        isModified={isModified}
+        currentTheme={currentTheme}
+        onSelectTheme={setCurrentTheme}
+        onPrintPdf={() => handlePrintPdf()}
+      />
 
       {/* Mode Selector & Status Header */}
       <div className="print:hidden flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-2.5 shadow-sm">
@@ -130,11 +159,16 @@ export function ResumePreviewContainer({
               analysis={currentAtsAnalysis}
               highlightOverrides={highlightOverrides}
               onToggleHighlight={() => setHighlightOverrides((prev) => !prev)}
+              highlightAtsKeywords={highlightAtsKeywords}
+              onToggleAtsKeywords={() => setHighlightAtsKeywords((prev) => !prev)}
             />
 
             <FullResumeDocument
+              ref={resumeRef}
               documentData={liveDocData}
               highlightOverrides={highlightOverrides}
+              highlightAtsKeywords={highlightAtsKeywords}
+              themeId={currentTheme}
             />
           </div>
         </div>
@@ -145,19 +179,33 @@ export function ResumePreviewContainer({
               analysis={currentAtsAnalysis}
               highlightOverrides={highlightOverrides}
               onToggleHighlight={() => setHighlightOverrides((prev) => !prev)}
+              highlightAtsKeywords={highlightAtsKeywords}
+              onToggleAtsKeywords={() => setHighlightAtsKeywords((prev) => !prev)}
             />
           </aside>
 
           <main className="lg:col-span-8">
             <FullResumeDocument
+              ref={resumeRef}
               documentData={liveDocData}
               highlightOverrides={highlightOverrides}
+              highlightAtsKeywords={highlightAtsKeywords}
+              themeId={currentTheme}
             />
           </main>
         </div>
       ) : (
         /* Code Only Full-width */
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto space-y-6">
+          <div className="hidden">
+            <FullResumeDocument
+              ref={resumeRef}
+              documentData={liveDocData}
+              highlightOverrides={highlightOverrides}
+              highlightAtsKeywords={false}
+              themeId={currentTheme}
+            />
+          </div>
           <LiveResumeCodeEditor
             initialDocumentData={initialDocumentData}
             onChange={handleCodeChange}

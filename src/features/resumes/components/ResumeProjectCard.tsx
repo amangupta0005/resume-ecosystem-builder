@@ -10,6 +10,9 @@ import {
   ChevronUp,
   Tag,
   FileCode,
+  GripVertical,
+  Trash2,
+  PlusCircle,
 } from "lucide-react";
 import type { DomainName } from "@/lib/constants/domains";
 import type { ResumeProjectData } from "@/features/resumes/server/queries";
@@ -28,6 +31,9 @@ type ResumeProjectCardProps = {
     bulletId: string,
     newOverrideText?: string,
   ) => void;
+  excludedProjects?: ResumeProjectData[];
+  onSwapProject?: (includedProjectId: string, excludedProjectId: string) => void;
+  dragHandleProps?: Record<string, any> | null;
 };
 
 export function ResumeProjectCard({
@@ -39,6 +45,9 @@ export function ResumeProjectCard({
   onToggleInclusion,
   onMoveOrder,
   onBulletUpdated,
+  excludedProjects = [],
+  onSwapProject,
+  dragHandleProps,
 }: ResumeProjectCardProps) {
   const [isExpanded, setIsExpanded] = useState(true);
 
@@ -55,33 +64,67 @@ export function ResumeProjectCard({
       {/* Header Bar */}
       <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-start sm:justify-between border-b border-slate-100">
         <div className="flex items-start gap-3 min-w-0 flex-1">
-          {/* Include / Exclude Toggle Button */}
-          <button
-            type="button"
-            onClick={() => onToggleInclusion(project.id, !project.included)}
-            title={
-              project.included
-                ? "Click to exclude from this resume"
-                : "Click to include in this resume"
-            }
-            className={`mt-0.5 inline-flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-semibold transition ${
-              project.included
-                ? "bg-emerald-600 text-white hover:bg-emerald-700 shadow-xs"
-                : "border border-slate-300 bg-white text-slate-600 hover:border-slate-400 hover:text-slate-900"
-            }`}
-          >
-            {project.included ? (
-              <>
-                <CheckCircle2 size={14} />
-                <span>Included</span>
-              </>
-            ) : (
-              <>
-                <Circle size={14} />
-                <span>Excluded</span>
-              </>
+          {/* Drag Handle (for included projects) */}
+          {project.included && dragHandleProps && (
+            <div
+              {...dragHandleProps}
+              className="mt-1 cursor-grab active:cursor-grabbing p-1 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
+              title="Click and drag up/down to reorder project"
+            >
+              <GripVertical size={18} />
+            </div>
+          )}
+
+          <div className="flex flex-col gap-1.5 mt-0.5">
+            {/* Include / Exclude Toggle Button */}
+            <button
+              type="button"
+              onClick={() => onToggleInclusion(project.id, !project.included)}
+              title={
+                project.included
+                  ? "Click to exclude from this resume"
+                  : "Click to include in this resume"
+              }
+              className={`inline-flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-semibold transition ${
+                project.included
+                  ? "bg-emerald-600 text-white hover:bg-emerald-700 shadow-xs"
+                  : "border border-slate-300 bg-white text-slate-600 hover:border-slate-400 hover:text-slate-900"
+              }`}
+            >
+              {project.included ? (
+                <>
+                  <CheckCircle2 size={14} />
+                  <span>Included</span>
+                </>
+              ) : (
+                <>
+                  <Circle size={14} />
+                  <span>Excluded</span>
+                </>
+              )}
+            </button>
+            
+            {project.included && excludedProjects.length > 0 && onSwapProject && (
+              <select
+                className="h-7 rounded-md border border-slate-300 text-[11px] font-medium text-slate-600 focus:ring-1 focus:ring-slate-500 max-w-[90px]"
+                onChange={(e) => {
+                  if (e.target.value) {
+                    onSwapProject(project.id, e.target.value);
+                    e.target.value = "";
+                  }
+                }}
+                title="Swap with another project"
+                value=""
+              >
+                <option value="" disabled>Swap with...</option>
+                {excludedProjects.map(ep => (
+                  <option key={ep.id} value={ep.id}>
+                    {ep.title}
+                  </option>
+                ))}
+              </select>
             )}
-          </button>
+          </div>
 
           <div className="space-y-1.5 min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
@@ -142,7 +185,7 @@ export function ResumeProjectCard({
           </div>
         </div>
 
-        {/* Order controls & Collapse toggle */}
+        {/* Order controls, Delete action & Collapse toggle */}
         <div className="flex shrink-0 items-center gap-1 sm:self-start">
           {project.included ? (
             <>
@@ -168,6 +211,29 @@ export function ResumeProjectCard({
               </button>
             </>
           ) : null}
+
+          {/* Delete from Resume / Add to Resume Action */}
+          {project.included ? (
+            <button
+              type="button"
+              onClick={() => onToggleInclusion(project.id, false)}
+              title="Delete this project from this resume"
+              className="inline-flex h-8 items-center gap-1.5 rounded-md border border-red-200 bg-red-50/60 px-2.5 text-xs font-medium text-red-600 hover:bg-red-100 hover:border-red-300 transition"
+            >
+              <Trash2 size={13} />
+              <span>Delete from resume</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => onToggleInclusion(project.id, true)}
+              title="Add this project to this resume"
+              className="inline-flex h-8 items-center gap-1.5 rounded-md border border-emerald-200 bg-emerald-50 px-2.5 text-xs font-medium text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300 transition"
+            >
+              <PlusCircle size={13} />
+              <span>+ Add to resume</span>
+            </button>
+          )}
 
           <button
             type="button"

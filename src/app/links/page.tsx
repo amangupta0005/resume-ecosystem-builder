@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { FileText, ExternalLink, Briefcase, FileCode2 } from "lucide-react";
-import prisma from "@/lib/prisma";
-import { domainToSlug } from "@/lib/constants/domains";
+import { ExternalLink, Briefcase, FileCode2 } from "lucide-react";
+import { prisma } from "@/lib/db";
+import { domainToSlug, type DomainName } from "@/lib/constants/domains";
 
 export const dynamic = "force-dynamic";
 
@@ -45,7 +45,7 @@ export default async function MobileLinksPage() {
               
               <div className="space-y-3">
                 {domain.resumeConfigs.map((config) => {
-                  const slug = domainToSlug(domain.name as any);
+                  const slug = domainToSlug(domain.name as DomainName);
                   const previewUrl = `/resumes/${slug}/${config.id}/preview`;
                   
                   return (

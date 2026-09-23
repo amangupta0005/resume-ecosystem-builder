@@ -1,4 +1,5 @@
-import { domainToSlug, type DomainName } from "@/lib/constants/domains";
+import { notFound } from "next/navigation";
+import { DOMAIN_NAMES, domainToSlug, type DomainName } from "@/lib/constants/domains";
 import { prisma } from "@/lib/db";
 import { toProjectStatusInput, isDomainName } from "@/features/projects/server/mappers";
 import { getProfileData, type ProfileData } from "@/features/profile/server/queries";
@@ -218,15 +219,15 @@ export async function getResumeDocumentData(
   configId?: string
 ): Promise<ResumeDocumentData> {
   const profile = await getProfileData();
-  
+
   const includeQuery = {
     projects: {
       where: { included: true },
-      orderBy: { order: "asc" } as any,
+      orderBy: { order: "asc" as const },
       include: {
         project: {
           include: {
-            bullets: { orderBy: { order: "asc" } as any },
+            bullets: { orderBy: { order: "asc" as const } },
           },
         },
       },
@@ -253,13 +254,17 @@ export async function getResumeDocumentData(
     }
   }
 
-  const overrides = resumeConfig?.bulletOverrides ?? [];
+  if (!resumeConfig) {
+    notFound();
+  }
+
+  const overrides = resumeConfig.bulletOverrides;
   const overrideMap = new Map<string, string>();
   for (const ov of overrides) {
     overrideMap.set(ov.bulletId, ov.text);
   }
 
-  const rawProjects = resumeConfig?.projects ?? [];
+  const rawProjects = resumeConfig.projects;
   const skillsSet = new Set<string>();
 
   // Add profile skills
@@ -300,7 +305,7 @@ export async function getResumeDocumentData(
 
   const atsAnalysis = analyzeAtsCompliance(formattedProjects);
 
-  const skillsOverride = resumeConfig?.skills
+  const skillsOverride = resumeConfig.skills
     ? (resumeConfig.skills as { category: string; skills: string }[])
     : null;
 
@@ -312,8 +317,8 @@ export async function getResumeDocumentData(
     projects: formattedProjects,
     aggregatedSkills: Array.from(skillsSet).sort((a, b) => a.localeCompare(b)),
     atsAnalysis,
-    titleOverride: resumeConfig?.title,
-    summaryOverride: resumeConfig?.summary,
+    titleOverride: resumeConfig.title,
+    summaryOverride: resumeConfig.summary,
     skillsOverride: skillsOverride,
   };
 }
@@ -359,38 +364,36 @@ export async function getAllDomainsMatrixData(): Promise<MatrixData> {
     }),
   ]);
 
-  const domainCounts: MatrixData["domainCounts"] = {
-    "AI/ML": { includedProjects: 0, overridesCount: 0, slug: "ai-ml" },
-    "Full-Stack": { includedProjects: 0, overridesCount: 0, slug: "full-stack" },
-    "Computer Vision": { includedProjects: 0, overridesCount: 0, slug: "computer-vision" },
-    "IoT+ML": { includedProjects: 0, overridesCount: 0, slug: "iot-ml" },
-    "AI Content Evaluation": { includedProjects: 0, overridesCount: 0, slug: "ai-content-evaluation" },
-  } as any;
+  const domainCounts = {} as MatrixData["domainCounts"];
+  for (const dName of DOMAIN_NAMES) {
+    domainCounts[dName] = {
+      includedProjects: 0,
+      overridesCount: 0,
+      slug: domainToSlug(dName),
+    };
+  }
 
   for (const d of domains) {
     if (isDomainName(d.name)) {
       const config = d.resumeConfigs[0];
-      domainCounts[d.name as DomainName] = {
+      domainCounts[d.name] = {
         includedProjects: config?.projects.length ?? 0,
         overridesCount: config?.bulletOverrides.length ?? 0,
-        slug: domainToSlug(d.name as DomainName),
+        slug: domainToSlug(d.name),
       };
     }
   }
 
   const matrixProjects: MatrixProjectItem[] = projects.map((p) => {
-    const inclusions: Record<DomainName, boolean> = {
-      "AI/ML": false,
-      "Full-Stack": false,
-      "Computer Vision": false,
-      "IoT+ML": false,
-      "AI Content Evaluation": false,
-    } as any;
+    const inclusions = {} as Record<DomainName, boolean>;
+    for (const dName of DOMAIN_NAMES) {
+      inclusions[dName] = false;
+    }
 
     for (const rp of p.resumeProjects) {
       const dName = rp.resumeConfig.domain.name;
       if (isDomainName(dName)) {
-        inclusions[dName as DomainName] = rp.included;
+        inclusions[dName] = rp.included;
       }
     }
 
@@ -399,18 +402,18 @@ export async function getAllDomainsMatrixData(): Promise<MatrixData> {
       .filter(isDomainName);
 
     const bullets = p.bullets.map((b) => {
-      const domainVariations: MatrixProjectItem["bullets"][0]["domainVariations"] = {
-        "AI/ML": { text: b.text, isOverridden: false },
-        "Full-Stack": { text: b.text, isOverridden: false },
-        "Computer Vision": { text: b.text, isOverridden: false },
-        "IoT+ML": { text: b.text, isOverridden: false },
-        "AI Content Evaluation": { text: b.text, isOverridden: false },
-      } as any;
+      const domainVariations = {} as MatrixProjectItem["bullets"][0]["domainVariations"];
+      for (const dName of DOMAIN_NAMES) {
+        domainVariations[dName] = {
+          text: b.text,
+          isOverridden: false,
+        };
+      }
 
       for (const ov of b.overrides) {
         const dName = ov.resumeConfig.domain.name;
         if (isDomainName(dName)) {
-          domainVariations[dName as DomainName] = {
+          domainVariations[dName] = {
             text: ov.text,
             isOverridden: true,
           };

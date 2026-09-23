@@ -135,9 +135,8 @@ export async function saveProfileAction(
     }
 
     revalidatePath("/profile");
-    revalidatePath("/resumes");
-    revalidatePath("/resumes/[domain]", "page");
-    revalidatePath("/resumes/[domain]/preview", "page");
+    revalidatePath("/resumes", "layout");
+    revalidatePath("/links");
 
     return {
       status: "success",

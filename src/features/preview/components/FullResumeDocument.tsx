@@ -1,16 +1,28 @@
 "use client";
 
+import React, { forwardRef } from "react";
 import type { ResumeDocumentData } from "@/features/preview/server/queries";
+import { renderAtsHighlightedText } from "@/lib/atsHighlighter";
+import { RESUME_THEMES, type ResumeThemeId } from "@/lib/resumeThemes";
 
 type FullResumeDocumentProps = {
   documentData: ResumeDocumentData;
   highlightOverrides?: boolean;
+  highlightAtsKeywords?: boolean;
+  themeId?: ResumeThemeId;
 };
 
-export function FullResumeDocument({
-  documentData,
-  highlightOverrides = true,
-}: FullResumeDocumentProps) {
+export const FullResumeDocument = forwardRef<HTMLDivElement, FullResumeDocumentProps>(
+  function FullResumeDocument(
+    {
+      documentData,
+      highlightOverrides = true,
+      highlightAtsKeywords = false,
+      themeId = "slate",
+    },
+    ref
+  ) {
+  const theme = RESUME_THEMES[themeId] || RESUME_THEMES.slate;
   const { domainName, profile, projects, aggregatedSkills } = documentData;
 
   const contactItems: string[] = [];
@@ -29,15 +41,16 @@ export function FullResumeDocument({
 
   return (
     <div
+      ref={ref}
       id="ats-resume-sheet"
       className="mx-auto max-w-[820px] bg-white p-8 sm:p-12 shadow-md print:shadow-none print:p-0 print:max-w-none text-slate-900 font-sans leading-relaxed border border-slate-200 print:border-none space-y-5"
     >
       {/* Resume Header */}
-      <header className="border-b-2 border-slate-900 pb-4 text-center space-y-1.5">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-950 uppercase">
+      <header className={`border-b-2 ${theme.headerBorder} pb-4 text-center space-y-1.5`}>
+        <h1 className={`text-2xl sm:text-3xl font-bold tracking-tight ${theme.titleText} uppercase`}>
           {profile.fullName}
         </h1>
-        <div className="text-xs font-bold uppercase tracking-widest text-slate-700">
+        <div className={`text-xs font-bold uppercase tracking-widest ${theme.sectionTitle}`}>
           {documentData.titleOverride ? documentData.titleOverride : `Software Engineer — ${domainName}`}
         </div>
         {contactItems.length > 0 ? (
@@ -50,7 +63,7 @@ export function FullResumeDocument({
       {/* Professional Summary */}
       {(documentData.summaryOverride || profile.summary) ? (
         <section className="space-y-1.5">
-          <h2 className="text-xs font-bold uppercase tracking-widest text-slate-900 border-b border-slate-300 pb-0.5">
+          <h2 className={`text-xs font-bold uppercase tracking-widest ${theme.sectionTitle} border-b ${theme.sectionBorder} pb-0.5`}>
             Professional Summary
           </h2>
           <p className="text-xs leading-relaxed text-slate-800 text-justify">
@@ -62,13 +75,13 @@ export function FullResumeDocument({
       {/* Technical Skills Section */}
       {documentData.skillsOverride && documentData.skillsOverride.length > 0 ? (
         <section className="space-y-2">
-          <h2 className="text-xs font-bold uppercase tracking-widest text-slate-900 border-b border-slate-300 pb-0.5">
+          <h2 className={`text-xs font-bold uppercase tracking-widest ${theme.sectionTitle} border-b ${theme.sectionBorder} pb-0.5`}>
             Technical Skills
           </h2>
           <div className="text-xs space-y-1 text-slate-800">
             {documentData.skillsOverride.map((skill, index) => (
               <div key={index}>
-                <span className="font-bold text-slate-950">{skill.category}: </span>
+                <span className={`font-bold ${theme.titleText}`}>{skill.category}: </span>
                 <span>{skill.skills}</span>
               </div>
             ))}
@@ -76,41 +89,41 @@ export function FullResumeDocument({
         </section>
       ) : hasCategorizedSkills || aggregatedSkills.length > 0 ? (
         <section className="space-y-2">
-          <h2 className="text-xs font-bold uppercase tracking-widest text-slate-900 border-b border-slate-300 pb-0.5">
+          <h2 className={`text-xs font-bold uppercase tracking-widest ${theme.sectionTitle} border-b ${theme.sectionBorder} pb-0.5`}>
             Technical Skills
           </h2>
           <div className="text-xs space-y-1 text-slate-800">
             {profile.languages.length > 0 ? (
               <div>
-                <span className="font-bold text-slate-950">Programming Languages: </span>
+                <span className={`font-bold ${theme.titleText}`}>Programming Languages: </span>
                 <span>{profile.languages.join(", ")}</span>
               </div>
             ) : null}
 
             {profile.frameworks.length > 0 ? (
               <div>
-                <span className="font-bold text-slate-950">Frameworks & Libraries: </span>
+                <span className={`font-bold ${theme.titleText}`}>Frameworks & Libraries: </span>
                 <span>{profile.frameworks.join(", ")}</span>
               </div>
             ) : null}
 
             {profile.tools.length > 0 ? (
               <div>
-                <span className="font-bold text-slate-950">Tools, Cloud & Databases: </span>
+                <span className={`font-bold ${theme.titleText}`}>Tools, Cloud & Databases: </span>
                 <span>{profile.tools.join(", ")}</span>
               </div>
             ) : null}
 
             {profile.strengths && profile.strengths.length > 0 ? (
               <div>
-                <span className="font-bold text-slate-950">Core Competencies: </span>
+                <span className={`font-bold ${theme.titleText}`}>Core Competencies: </span>
                 <span>{profile.strengths.join(", ")}</span>
               </div>
             ) : null}
 
             {!hasCategorizedSkills && aggregatedSkills.length > 0 ? (
               <div>
-                <span className="font-bold text-slate-950">Proficiencies: </span>
+                <span className={`font-bold ${theme.titleText}`}>Proficiencies: </span>
                 <span>{aggregatedSkills.join(", ")}</span>
               </div>
             ) : null}
@@ -120,7 +133,7 @@ export function FullResumeDocument({
 
       {/* Featured Projects Section */}
       <section className="space-y-4">
-        <h2 className="text-xs font-bold uppercase tracking-widest text-slate-900 border-b border-slate-300 pb-0.5">
+        <h2 className={`text-xs font-bold uppercase tracking-widest ${theme.sectionTitle} border-b ${theme.sectionBorder} pb-0.5`}>
           Key Projects ({projects.length})
         </h2>
 
@@ -134,7 +147,7 @@ export function FullResumeDocument({
               {/* Project Header */}
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <h3 className="text-xs font-bold text-slate-950">
+                  <h3 className={`text-xs font-bold ${theme.titleText}`}>
                     {project.title}
                   </h3>
                   {project.techStack.length > 0 ? (
@@ -179,7 +192,7 @@ export function FullResumeDocument({
                         : "text-slate-800"
                     }`}
                   >
-                    {bullet.text}
+                    {renderAtsHighlightedText(bullet.text, highlightAtsKeywords)}
                   </li>
                 ))}
               </ul>
@@ -191,7 +204,7 @@ export function FullResumeDocument({
       {/* Education Section */}
       {profile.educations.length > 0 ? (
         <section className="space-y-2 break-inside-avoid">
-          <h2 className="text-xs font-bold uppercase tracking-widest text-slate-900 border-b border-slate-300 pb-0.5">
+          <h2 className={`text-xs font-bold uppercase tracking-widest ${theme.sectionTitle} border-b ${theme.sectionBorder} pb-0.5`}>
             Education
           </h2>
           <div className="space-y-2">
@@ -203,7 +216,7 @@ export function FullResumeDocument({
 
               return (
                 <div key={edu.id} className="text-xs">
-                  <div className="flex flex-wrap items-baseline justify-between gap-1 font-semibold text-slate-950">
+                  <div className={`flex flex-wrap items-baseline justify-between gap-1 font-semibold ${theme.titleText}`}>
                     <span>
                       {edu.degree} — {edu.institution}
                     </span>
@@ -226,14 +239,14 @@ export function FullResumeDocument({
       {/* Certifications Section */}
       {profile.certifications.length > 0 ? (
         <section className="space-y-2 break-inside-avoid">
-          <h2 className="text-xs font-bold uppercase tracking-widest text-slate-900 border-b border-slate-300 pb-0.5">
+          <h2 className={`text-xs font-bold uppercase tracking-widest ${theme.sectionTitle} border-b ${theme.sectionBorder} pb-0.5`}>
             Certifications
           </h2>
           <ul className="text-xs space-y-1 text-slate-800">
             {profile.certifications.map((cert) => (
               <li key={cert.id} className="flex flex-wrap items-baseline justify-between gap-1">
                 <div>
-                  <span className="font-semibold text-slate-950">{cert.name}</span>
+                  <span className={`font-semibold ${theme.titleText}`}>{cert.name}</span>
                   <span className="text-slate-600"> — {cert.issuer}</span>
                 </div>
                 {cert.issueDate ? (
@@ -246,4 +259,4 @@ export function FullResumeDocument({
       ) : null}
     </div>
   );
-}
+});

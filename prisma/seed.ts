@@ -347,6 +347,11 @@ const realProjects: ProjectInput[] = [
 
 // Curated 3 top projects per domain
 const DOMAIN_PROJECT_MAPPING: Record<DomainName, string[]> = {
+  "All Domains": [
+    "QuickGPT – AI Chatbot Platform",
+    "CryptoStack – Real-Time Crypto Tracker",
+    "AcadSecure – AI Plagiarism & Collusion Detection",
+  ],
   "Full-Stack": [
     "QuickGPT – AI Chatbot Platform",
     "CryptoStack – Real-Time Crypto Tracker",
@@ -366,6 +371,16 @@ const DOMAIN_PROJECT_MAPPING: Record<DomainName, string[]> = {
     "Sky2Soil – Precision Agriculture Telemetry",
     "NeuroShield – AI Cognitive Fatigue Monitor",
     "SmartLogger – Python Logging & Diagnostic Library",
+  ],
+  "AI Content Evaluation": [
+    "AcadSecure – AI Plagiarism & Collusion Detection",
+    "QuickGPT – AI Chatbot Platform",
+    "Aero Defect AI – Automated Defect Inspection",
+  ],
+  "Company Full-Stack": [
+    "QuickGPT – AI Chatbot Platform",
+    "CryptoStack – Real-Time Crypto Tracker",
+    "CollabTrack – Student Collaboration Platform",
   ],
 };
 
@@ -429,11 +444,19 @@ async function seedDomains(): Promise<void> {
       create: { name },
     });
 
-    await prisma.resumeConfig.upsert({
-      where: { domainId: domain.id },
-      update: {},
-      create: { domainId: domain.id },
+    const existingConfig = await prisma.resumeConfig.findFirst({
+      where: { domainId: domain.id, isDefault: true },
     });
+
+    if (!existingConfig) {
+      await prisma.resumeConfig.create({
+        data: {
+          domainId: domain.id,
+          variantName: "Default",
+          isDefault: true,
+        },
+      });
+    }
   }
 }
 

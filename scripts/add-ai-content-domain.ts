@@ -55,11 +55,14 @@ async function main() {
 
   // Step 3: Create a ResumeConfig for this domain
   console.log(`Creating ResumeConfig for domain`);
-  const resumeConfig = await prisma.resumeConfig.upsert({
+  let resumeConfig = await prisma.resumeConfig.findFirst({
     where: { domainId: domain.id },
-    update: {},
-    create: { domainId: domain.id },
   });
+  if (!resumeConfig) {
+    resumeConfig = await prisma.resumeConfig.create({
+      data: { domainId: domain.id, variantName: "Default", isDefault: true },
+    });
+  }
 
   // Create ResumeProject entries
   const orderMapping: Record<string, number> = {

@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import { DOMAIN_NAMES, domainToSlug, type DomainName } from "@/lib/constants/domains";
 import { prisma } from "@/lib/db";
 import { toProjectStatusInput, isDomainName } from "@/features/projects/server/mappers";
@@ -22,6 +23,8 @@ export type ResumeProjectData = {
   isDomainMatch: boolean;
   included: boolean;
   order: number;
+  githubUrl?: string | null;
+  liveUrl?: string | null;
   bullets: ResumeBulletData[];
 };
 
@@ -113,7 +116,6 @@ export async function getResumeConfigData(
       where: { id: configId },
     });
     if (!resumeConfig) {
-      const { notFound } = require("next/navigation");
       notFound();
     }
   } else {
@@ -235,6 +237,8 @@ export async function getResumeConfigData(
       isDomainMatch,
       included: rp.included,
       order: rp.order,
+      githubUrl: rp.project.githubUrl,
+      liveUrl: rp.project.liveUrl,
       bullets: formattedBullets,
     };
   });

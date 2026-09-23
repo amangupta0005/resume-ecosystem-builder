@@ -7,6 +7,7 @@ import {
   reorderResumeProjectsSchema,
   saveBulletOverrideSchema,
   revertBulletOverrideSchema,
+  duplicateResumeConfigSchema,
 } from "@/features/resumes/validations/resumeConfig";
 
 export type ResumeActionResult = {
@@ -181,9 +182,21 @@ export async function duplicateResumeConfigAction(
   sourceConfigId: string,
   newVariantName: string
 ): Promise<{ success: boolean; newConfigId?: string; message?: string }> {
+  const parsed = duplicateResumeConfigSchema.safeParse({
+    sourceConfigId,
+    newVariantName,
+  });
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      message: parsed.error.issues[0]?.message ?? "Invalid variant duplication data.",
+    };
+  }
+
   try {
     const sourceConfig = await prisma.resumeConfig.findUnique({
-      where: { id: sourceConfigId },
+      where: { id: parsed.data.sourceConfigId },
       include: {
         projects: true,
         bulletOverrides: true,
@@ -197,7 +210,7 @@ export async function duplicateResumeConfigAction(
     const newConfig = await prisma.resumeConfig.create({
       data: {
         domainId: sourceConfig.domainId,
-        variantName: newVariantName,
+        variantName: parsed.data.newVariantName,
         isDefault: false,
         title: sourceConfig.title,
         summary: sourceConfig.summary,
