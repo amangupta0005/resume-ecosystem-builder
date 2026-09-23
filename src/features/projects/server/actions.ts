@@ -8,6 +8,7 @@ import { prisma } from "@/lib/db";
 import { projectSchema, type ProjectInput } from "@/lib/validations/resume";
 
 import { toPrismaProjectStatus } from "./mappers";
+import { invalidateAllResumeCaches } from "@/lib/redis";
 
 export type ProjectFormState = {
   status: "idle" | "error";
@@ -112,6 +113,7 @@ export async function createProjectAction(
     data: getProjectWriteData(parsedPayload.data),
   });
 
+  await invalidateAllResumeCaches();
   revalidatePath("/");
   redirect("/");
 }
@@ -162,6 +164,7 @@ export async function updateProjectAction(
     },
   });
 
+  await invalidateAllResumeCaches();
   revalidatePath("/");
   revalidatePath(`/projects/${parsedId.data}/edit`);
   redirect("/");
@@ -179,5 +182,6 @@ export async function deleteProjectAction(formData: FormData): Promise<void> {
     where: { id: parsedProjectId.data },
   });
 
+  await invalidateAllResumeCaches();
   revalidatePath("/");
 }

@@ -1,0 +1,43 @@
+version: "3.8"
+
+services:
+  # In-memory high-speed cache & rate limiter (capped to 64MB RAM)
+  redis:
+    image: redis:7-alpine
+    container_name: resume-redis
+    restart: unless-stopped
+    command: redis-server --maxmemory 64mb --maxmemory-policy allkeys-lru --save "" --appendonly no
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - resume-network
+
+  # Next.js Standalone Production App
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: resume-app
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+    ports:
+      # Map host port 80 directly to Next.js (No Nginx overhead required)
+      - "80:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOSTNAME=0.0.0.0
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=${DATABASE_URL}
+      - APP_PASSCODE=${APP_PASSCODE}
+    networks:
+      - resume-network
+
+networks:
+  resume-network:
+    driver: bridge

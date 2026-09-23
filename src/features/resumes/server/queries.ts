@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { DOMAIN_NAMES, domainToSlug, type DomainName } from "@/lib/constants/domains";
 import { prisma } from "@/lib/db";
 import { toProjectStatusInput, isDomainName } from "@/features/projects/server/mappers";
+import { getCache, setCache, CACHE_TTL } from "@/lib/redis";
 
 export type ResumeBulletData = {
   id: string;
@@ -52,6 +53,10 @@ export type ResumeVariantItem = {
 };
 
 export async function getDomainResumesOverview(): Promise<DomainResumeOverviewItem[]> {
+  const cacheKey = "overview:domains";
+  const cached = await getCache<DomainResumeOverviewItem[]>(cacheKey);
+  if (cached) return cached;
+
   const domains = await prisma.domain.findMany({
     include: {
       projects: true,
@@ -66,7 +71,7 @@ export async function getDomainResumesOverview(): Promise<DomainResumeOverviewIt
     },
   });
 
-  return DOMAIN_NAMES.map((name) => {
+  const result = DOMAIN_NAMES.map((name) => {
     const domainRecord = domains.find((d) => d.name === name);
     const resumeConfig = domainRecord?.resumeConfigs[0];
 
@@ -78,9 +83,16 @@ export async function getDomainResumesOverview(): Promise<DomainResumeOverviewIt
       overrideCount: resumeConfig?.bulletOverrides.length ?? 0,
     };
   });
+
+  await setCache(cacheKey, result, CACHE_TTL.RESUME_CONFIG);
+  return result;
 }
 
 export async function getDomainVariants(domainName: DomainName): Promise<ResumeVariantItem[]> {
+  const cacheKey = `variants:${domainName}`;
+  const cached = await getCache<ResumeVariantItem[]>(cacheKey);
+  if (cached) return cached;
+
   const domain = await prisma.domain.findUnique({
     where: { name: domainName },
     include: {
@@ -90,13 +102,20 @@ export async function getDomainVariants(domainName: DomainName): Promise<ResumeV
       },
     },
   });
-  return domain?.resumeConfigs ?? [];
+
+  const result = domain?.resumeConfigs ?? [];
+  await setCache(cacheKey, result, CACHE_TTL.RESUME_CONFIG);
+  return result;
 }
 
 export async function getResumeConfigData(
   domainName: DomainName,
   configId?: string
 ): Promise<ResumeConfigData> {
+  const cacheKey = `resume_config:${domainName}:${configId || "default"}`;
+  const cached = await getCache<ResumeConfigData>(cacheKey);
+  if (cached) return cached;
+
   // 1. Ensure Domain exists
   let domain = await prisma.domain.findUnique({
     where: { name: domainName },
@@ -246,7 +265,7 @@ export async function getResumeConfigData(
   const includedCount = formattedProjects.filter((p) => p.included).length;
   const overrideCount = overrides.length;
 
-  return {
+  const result: ResumeConfigData = {
     resumeConfigId: resumeConfig.id,
     domainName,
     domainSlug: domainToSlug(domainName),
@@ -254,4 +273,7 @@ export async function getResumeConfigData(
     includedCount,
     overrideCount,
   };
+
+  await setCache(cacheKey, result, CACHE_TTL.RESUME_CONFIG);
+  return result;
 }

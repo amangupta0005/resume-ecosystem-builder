@@ -9,6 +9,7 @@ import {
   revertBulletOverrideSchema,
   duplicateResumeConfigSchema,
 } from "@/features/resumes/validations/resumeConfig";
+import { invalidateAllResumeCaches } from "@/lib/redis";
 
 export type ResumeActionResult = {
   success: boolean;
@@ -43,6 +44,7 @@ export async function toggleProjectInclusionAction(
       },
     });
 
+    await invalidateAllResumeCaches();
     revalidatePath("/resumes", "layout");
     return { success: true };
   } catch (error) {
@@ -97,6 +99,7 @@ export async function reorderResumeProjectsAction(
       }
     });
 
+    await invalidateAllResumeCaches();
     revalidatePath("/resumes", "layout");
     return { success: true };
   } catch (error) {
@@ -141,6 +144,7 @@ export async function saveBulletOverrideAction(
       },
     });
 
+    await invalidateAllResumeCaches();
     revalidatePath("/resumes", "layout");
     return { success: true };
   } catch (error) {
@@ -170,6 +174,7 @@ export async function revertBulletOverrideAction(
       },
     });
 
+    await invalidateAllResumeCaches();
     revalidatePath("/resumes", "layout");
     return { success: true };
   } catch (error) {
@@ -231,6 +236,7 @@ export async function duplicateResumeConfigAction(
       },
     });
 
+    await invalidateAllResumeCaches();
     revalidatePath("/resumes", "layout");
     return { success: true, newConfigId: newConfig.id };
   } catch (error) {

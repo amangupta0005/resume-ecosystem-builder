@@ -8,8 +8,8 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useReactToPrint } from "react-to-print";
-import type { ResumeDocumentData } from "@/features/preview/server/queries";
-import { analyzeAtsCompliance } from "@/features/preview/server/queries";
+import type { ResumeDocumentData } from "@/features/preview/lib/atsAnalysis";
+import { analyzeAtsCompliance } from "@/features/preview/lib/atsAnalysis";
 import type { ResumeThemeId } from "@/lib/resumeThemes";
 import { ExportBar } from "./ExportBar";
 import { AtsScorecard } from "./AtsScorecard";
