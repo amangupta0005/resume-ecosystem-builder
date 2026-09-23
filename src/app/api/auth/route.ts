@@ -43,13 +43,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true });
     }
 
+    const forwardedProto = headersList.get("x-forwarded-proto");
+    const isHttps = request.url.startsWith("https://") || forwardedProto === "https";
+
     if (parsed.data.passcode === process.env.APP_PASSCODE) {
       // Clear rate limit on successful authentication
       await invalidateCache(rateLimitKey);
 
       cookies().set("auth_session", "authenticated", {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        secure: isHttps,
         sameSite: "lax",
         path: "/",
         maxAge: 60 * 60 * 24 * 30, // 30 days

@@ -27,10 +27,10 @@ function LoginContent() {
 
       if (res.ok) {
         const callbackUrl = searchParams.get("callbackUrl") || "/links";
-        router.push(callbackUrl);
-        router.refresh();
+        window.location.href = callbackUrl;
       } else {
-        setError("Incorrect passcode");
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || "Incorrect passcode");
       }
     } catch {
       setError("An error occurred. Please try again.");
