@@ -89,6 +89,43 @@ const realProfile = {
 
 const realProjects: ProjectInput[] = [
   {
+    title: "Resume Ecosystem Builder – Multi-Variant ATS Engine",
+    description:
+      "Production-grade multi-variant resume builder and ATS intelligence platform featuring real-time keyword parsing, drag-and-drop curation, Redis caching, and automated cloud deployment.",
+    techStack: [
+      "Next.js 14",
+      "React 18",
+      "TypeScript",
+      "Tailwind CSS",
+      "Prisma ORM",
+      "PostgreSQL",
+      "Redis",
+      "Docker",
+      "AWS EC2",
+      "DuckDNS",
+      "Systemd",
+      "Zod",
+    ],
+    status: "completed",
+    githubUrl: "https://github.com/aman-coder-005/resume-ecosystem-builder",
+    liveUrl: "http://aman-resumes.duckdns.org",
+    domainNames: ["Full-Stack", "AI/ML", "Company Full-Stack"],
+    bullets: [
+      {
+        text: "Architected a multi-variant resume platform with Next.js 14 App Router, TypeScript, and Tailwind CSS, featuring drag-and-drop project curation (@hello-pangea/dnd), real-time ATS keyword auditing, and instant 1-click Markdown export for LLMs",
+        order: 0,
+      },
+      {
+        text: "Engineered an atomic PostgreSQL backend via Prisma ORM with negative-index transaction reordering, paired with an in-memory Redis 7 cache and sliding-window rate limiter, reducing query latency by 80%+ and preventing brute-force access",
+        order: 1,
+      },
+      {
+        text: "Containerized the full stack into an ultra-lean multi-stage Docker image (~130MB Next.js standalone) and deployed on AWS EC2 Free Tier with 2GB swap, configuring zero-touch systemd boot automation for dynamic DuckDNS domain synchronization",
+        order: 2,
+      },
+    ],
+  },
+  {
     title: "QuickGPT – AI Chatbot Platform",
     description:
       "Production-ready full-stack AI chatbot platform built with Gemini 2.5 Flash, featuring JWT authentication, session history, and cloud image processing.",
@@ -348,14 +385,14 @@ const realProjects: ProjectInput[] = [
 // Curated 3 top projects per domain
 const DOMAIN_PROJECT_MAPPING: Record<DomainName, string[]> = {
   "All Domains": [
+    "Resume Ecosystem Builder – Multi-Variant ATS Engine",
     "QuickGPT – AI Chatbot Platform",
-    "CryptoStack – Real-Time Crypto Tracker",
     "AcadSecure – AI Plagiarism & Collusion Detection",
   ],
   "Full-Stack": [
+    "Resume Ecosystem Builder – Multi-Variant ATS Engine",
     "QuickGPT – AI Chatbot Platform",
     "CryptoStack – Real-Time Crypto Tracker",
-    "CollabTrack – Student Collaboration Platform",
   ],
   "AI/ML": [
     "QuickGPT – AI Chatbot Platform",
@@ -378,9 +415,9 @@ const DOMAIN_PROJECT_MAPPING: Record<DomainName, string[]> = {
     "Aero Defect AI – Automated Defect Inspection",
   ],
   "Company Full-Stack": [
+    "Resume Ecosystem Builder – Multi-Variant ATS Engine",
     "QuickGPT – AI Chatbot Platform",
     "CryptoStack – Real-Time Crypto Tracker",
-    "CollabTrack – Student Collaboration Platform",
   ],
 };
 
