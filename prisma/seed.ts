@@ -143,7 +143,7 @@ const realProjects: ProjectInput[] = [
     ],
     status: "completed",
     githubUrl: "https://github.com/aman-coder-005/QuickGpt",
-    liveUrl: "https://quick-gpt-smoky.vercel.app",
+    liveUrl: "https://quickgpt-api.duckdns.org",
     domainNames: ["Full-Stack", "AI/ML", "Computer Vision"],
     bullets: [
       {
