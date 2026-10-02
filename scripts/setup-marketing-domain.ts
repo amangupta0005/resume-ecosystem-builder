@@ -158,7 +158,7 @@ async function main() {
   ];
 
   const configData = {
-    title: "Virtual Assistant – Founder's Office | Operations & Market Intelligence",
+    title: "Software Engineer",
     variantName: "Default",
     isDefault: true,
     summary:
