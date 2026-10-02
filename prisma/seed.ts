@@ -89,6 +89,38 @@ const realProfile = {
 
 const realProjects: ProjectInput[] = [
   {
+    title: "Micro-Market Real Estate Intelligence & Lead Tracker",
+    description:
+      "Micro-market real estate research and automated lead pipeline management suite for co-living, student housing, and residential leasing operations.",
+    techStack: [
+      "Google Sheets (Advanced Formulas)",
+      "MS Excel",
+      "Python (Pandas)",
+      "Canva",
+      "LinkedIn Outreach",
+      "Market Research",
+      "CRM Pipeline",
+    ],
+    status: "completed",
+    githubUrl: "https://github.com/aman-coder-005/real-estate-market-intel",
+    liveUrl: "https://docs.google.com/spreadsheets/d/real-estate-tracker-demo",
+    domainNames: ["Marketing"],
+    bullets: [
+      {
+        text: "Engineered a structured micro-market research framework analyzing rental yields, occupancy rates, and co-living benchmarks; synthesized raw property data into executive market briefs and visual decks in Canva",
+        order: 0,
+      },
+      {
+        text: "Built an automated lead tracking and pipeline management system in Google Sheets with conditional formatting, status triggers, and follow-up schedules to manage 50+ stakeholder threads with zero dropped items",
+        order: 1,
+      },
+      {
+        text: "Drafted high-converting outbound outreach scripts and meeting briefs for prospective partners, developers, and operators, ensuring structured meeting agendas and clear next steps",
+        order: 2,
+      },
+    ],
+  },
+  {
     title: "Resume Ecosystem Builder – Multi-Variant ATS Engine",
     description:
       "Production-grade multi-variant resume builder and ATS intelligence platform featuring real-time keyword parsing, drag-and-drop curation, Redis caching, and automated cloud deployment.",
@@ -418,6 +450,11 @@ const DOMAIN_PROJECT_MAPPING: Record<DomainName, string[]> = {
     "Resume Ecosystem Builder – Multi-Variant ATS Engine",
     "QuickGPT – AI Chatbot Platform",
     "CryptoStack – Real-Time Crypto Tracker",
+  ],
+  "Marketing": [
+    "Micro-Market Real Estate Intelligence & Lead Tracker",
+    "CollabTrack – Student Collaboration Platform",
+    "Resume Ecosystem Builder – Multi-Variant ATS Engine",
   ],
 };
 

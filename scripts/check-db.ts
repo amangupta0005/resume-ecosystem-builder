@@ -16,7 +16,8 @@ async function main() {
     console.log(`\nID: ${p.id}`);
     console.log(`Title: ${p.title}`);
     console.log(`Description: ${p.description}`);
-    console.log(`Tech Stack: ${p.techStack.join(", ")}`);
+    console.log(`Live URL: ${p.liveUrl}`);
+    console.log(`GitHub URL: ${p.githubUrl}`);
     console.log(`Domains: ${p.domains.map((d) => d.domain.name).join(", ")}`);
     console.log("Bullets:");
     p.bullets.forEach((b) => console.log(`  [${b.order}] ${b.text}`));

@@ -6,6 +6,7 @@ export const DOMAIN_NAMES = [
   "IoT+ML",
   "AI Content Evaluation",
   "Company Full-Stack",
+  "Marketing",
 ] as const;
 
 export type DomainName = (typeof DOMAIN_NAMES)[number];
@@ -18,6 +19,7 @@ export const DOMAIN_SLUG_MAP: Record<DomainName, string> = {
   "IoT+ML": "iot-ml",
   "AI Content Evaluation": "ai-content-evaluation",
   "Company Full-Stack": "company-full-stack",
+  "Marketing": "marketing",
 };
 
 export const SLUG_TO_DOMAIN_MAP: Record<string, DomainName> = {
@@ -28,6 +30,7 @@ export const SLUG_TO_DOMAIN_MAP: Record<string, DomainName> = {
   "iot-ml": "IoT+ML",
   "ai-content-evaluation": "AI Content Evaluation",
   "company-full-stack": "Company Full-Stack",
+  "marketing": "Marketing",
 };
 
 export function domainToSlug(domain: DomainName): string {
