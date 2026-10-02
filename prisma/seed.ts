@@ -89,17 +89,16 @@ const realProfile = {
 
 const realProjects: ProjectInput[] = [
   {
-    title: "Micro-Market Real Estate Intelligence & Lead Tracker",
+    title: "Co-Living & Real Estate Micro-Market Study (Independent Research)",
     description:
-      "Micro-market real estate research and automated lead pipeline management suite for co-living, student housing, and residential leasing operations.",
+      "Independent micro-market research study benchmarking co-living & managed housing spaces, paired with an automated Google Sheets lead tracking and follow-up pipeline.",
     techStack: [
-      "Google Sheets (Advanced Formulas)",
+      "Google Sheets (Formulas)",
       "MS Excel",
-      "Python (Pandas)",
-      "Canva",
-      "LinkedIn Outreach",
       "Market Research",
-      "CRM Pipeline",
+      "Canva",
+      "Outreach Drafting",
+      "Data Analysis",
     ],
     status: "completed",
     githubUrl: "",
@@ -107,15 +106,15 @@ const realProjects: ProjectInput[] = [
     domainNames: ["Marketing"],
     bullets: [
       {
-        text: "Engineered a structured micro-market research framework analyzing rental yields, occupancy rates, and co-living benchmarks; synthesized raw property data into executive market briefs and visual decks in Canva",
+        text: "Researched and benchmarked 40+ co-living and managed residential properties across key micro-markets (pricing per bed, amenities, occupancy patterns); synthesized findings into structured comparative briefs and visual summary decks in Canva",
         order: 0,
       },
       {
-        text: "Built an automated lead tracking and pipeline management system in Google Sheets with conditional formatting, status triggers, and follow-up schedules to manage 50+ stakeholder threads with zero dropped items",
+        text: "Built a modular pipeline tracker in Google Sheets using conditional formatting, status dropdowns, and date-based reminder formulas to simulate tracking prospect meetings and open follow-up loops",
         order: 1,
       },
       {
-        text: "Drafted high-converting outbound outreach scripts and meeting briefs for prospective partners, developers, and operators, ensuring structured meeting agendas and clear next steps",
+        text: "Drafted concise cold outreach message templates and meeting agendas targeted at property managers and operators, focusing on clarity, professionalism, and structured next steps",
         order: 2,
       },
     ],
@@ -452,7 +451,7 @@ const DOMAIN_PROJECT_MAPPING: Record<DomainName, string[]> = {
     "CryptoStack – Real-Time Crypto Tracker",
   ],
   "Marketing": [
-    "Micro-Market Real Estate Intelligence & Lead Tracker",
+    "Co-Living & Real Estate Micro-Market Study (Independent Research)",
     "CollabTrack – Student Collaboration Platform",
     "Resume Ecosystem Builder – Multi-Variant ATS Engine",
   ],
