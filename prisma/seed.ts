@@ -102,8 +102,8 @@ const realProjects: ProjectInput[] = [
       "CRM Pipeline",
     ],
     status: "completed",
-    githubUrl: "https://github.com/aman-coder-005/real-estate-market-intel",
-    liveUrl: "https://docs.google.com/spreadsheets/d/real-estate-tracker-demo",
+    githubUrl: "",
+    liveUrl: "",
     domainNames: ["Marketing"],
     bullets: [
       {

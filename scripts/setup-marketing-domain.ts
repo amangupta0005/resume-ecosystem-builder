@@ -32,8 +32,8 @@ async function main() {
       "CRM Pipeline",
     ],
     status: "completed" as const,
-    githubUrl: "https://github.com/aman-coder-005/real-estate-market-intel",
-    liveUrl: "https://docs.google.com/spreadsheets/d/real-estate-tracker-demo",
+    githubUrl: null,
+    liveUrl: null,
   };
 
   if (!realEstateProject) {
