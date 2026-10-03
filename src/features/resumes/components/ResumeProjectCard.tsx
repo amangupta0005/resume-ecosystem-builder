@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import type { DomainName } from "@/lib/constants/domains";
 import type { ResumeProjectData } from "@/features/resumes/server/queries";
+import type { DraggableProvidedDragHandleProps } from "@hello-pangea/dnd";
 import { BulletOverrideEditor } from "./BulletOverrideEditor";
 
 type ResumeProjectCardProps = {
@@ -33,7 +34,7 @@ type ResumeProjectCardProps = {
   ) => void;
   excludedProjects?: ResumeProjectData[];
   onSwapProject?: (includedProjectId: string, excludedProjectId: string) => void;
-  dragHandleProps?: Record<string, any> | null;
+  dragHandleProps?: DraggableProvidedDragHandleProps | null;
 };
 
 export function ResumeProjectCard({

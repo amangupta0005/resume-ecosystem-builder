@@ -5,7 +5,6 @@ import { Palette } from "lucide-react";
 import {
   RESUME_THEMES,
   type ResumeThemeId,
-  type ResumeTheme,
 } from "@/lib/resumeThemes";
 
 interface ThemeSelectorProps {

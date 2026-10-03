@@ -2,8 +2,16 @@ import { notFound } from "next/navigation";
 import { DOMAIN_NAMES, domainToSlug, type DomainName } from "@/lib/constants/domains";
 import { prisma } from "@/lib/db";
 import { toProjectStatusInput, isDomainName } from "@/features/projects/server/mappers";
-import { getProfileData, type ProfileData } from "@/features/profile/server/queries";
+import { getProfileData } from "@/features/profile/server/queries";
 import { getCache, setCache, CACHE_TTL } from "@/lib/redis";
+
+import {
+  STRONG_ACTION_VERBS,
+  type AtsAnalysisResult,
+  type ResumeDocumentProject,
+  type ResumeDocumentData,
+  analyzeAtsCompliance,
+} from "@/features/preview/lib/atsAnalysis";
 
 export {
   STRONG_ACTION_VERBS,
@@ -11,13 +19,7 @@ export {
   type ResumeDocumentProject,
   type ResumeDocumentData,
   analyzeAtsCompliance,
-} from "@/features/preview/lib/atsAnalysis";
-import {
-  STRONG_ACTION_VERBS,
-  type ResumeDocumentData,
-  type ResumeDocumentProject,
-  analyzeAtsCompliance,
-} from "@/features/preview/lib/atsAnalysis";
+};
 
 export type MatrixProjectItem = {
   id: string;
