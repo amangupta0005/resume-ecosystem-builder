@@ -35,7 +35,36 @@ export function ResumePreviewPanel({
     0,
   );
 
-  function handleCopyText() {
+  async function copyToClipboard(text: string): Promise<boolean> {
+    if (navigator?.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch (err) {
+        console.warn("[Clipboard API failed, attempting execCommand fallback]:", err);
+      }
+    }
+
+    // Fallback for non-secure HTTP contexts or restricted browser permissions
+    try {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      textArea.style.left = "-999999px";
+      textArea.style.top = "-999999px";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      const successful = document.execCommand("copy");
+      document.body.removeChild(textArea);
+      return successful;
+    } catch (err) {
+      console.error("[Clipboard fallback failed]:", err);
+      return false;
+    }
+  }
+
+  async function handleCopyText() {
     const textOutput = includedProjects
       .map((project) => {
         const header = `${project.title} | ${project.techStack.join(", ")}`;
@@ -46,19 +75,23 @@ export function ResumePreviewPanel({
       })
       .join("\n\n");
 
-    navigator.clipboard.writeText(textOutput);
-    setCopiedText(true);
-    setTimeout(() => setCopiedText(false), 2000);
+    const ok = await copyToClipboard(textOutput);
+    if (ok) {
+      setCopiedText(true);
+      setTimeout(() => setCopiedText(false), 2000);
+    }
   }
 
-  function handleCopyClaudeMarkdown() {
+  async function handleCopyClaudeMarkdown() {
     const mdOutput = serializeResumeProjectsToMarkdown(domainName, includedProjects, {
       includePromptHeader: true,
     });
 
-    navigator.clipboard.writeText(mdOutput);
-    setCopiedMarkdown(true);
-    setTimeout(() => setCopiedMarkdown(false), 2000);
+    const ok = await copyToClipboard(mdOutput);
+    if (ok) {
+      setCopiedMarkdown(true);
+      setTimeout(() => setCopiedMarkdown(false), 2000);
+    }
   }
 
   return (
@@ -79,22 +112,22 @@ export function ResumePreviewPanel({
         </div>
 
         {/* 1-Click Export Actions */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 shrink-0">
           <button
             type="button"
             onClick={handleCopyClaudeMarkdown}
             disabled={includedProjects.length === 0}
             title="Copy structured Markdown formatted for Claude, ChatGPT & LLM reviews"
-            className="inline-flex h-8 items-center gap-1.5 rounded-md bg-gradient-to-r from-purple-600 to-indigo-600 px-2.5 text-xs font-semibold text-white shadow-xs hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50 transition"
+            className="inline-flex h-8 items-center gap-1.5 rounded-md bg-gradient-to-r from-purple-600 to-indigo-600 px-2.5 text-xs font-semibold text-white shadow-xs hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50 transition whitespace-nowrap select-none"
           >
             {copiedMarkdown ? (
               <>
-                <Check size={13} className="text-white" />
+                <Check size={13} className="text-white shrink-0" />
                 <span>Copied for Claude! ✨</span>
               </>
             ) : (
               <>
-                <Bot size={13} />
+                <Bot size={13} className="shrink-0" />
                 <span>Copy for Claude/GPT</span>
               </>
             )}
@@ -105,7 +138,7 @@ export function ResumePreviewPanel({
             onClick={handleCopyText}
             disabled={includedProjects.length === 0}
             title="Copy standard plain text format"
-            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 disabled:opacity-50 transition"
+            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 disabled:opacity-50 transition whitespace-nowrap select-none"
           >
             {copiedText ? (
               <>
