@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { prisma } from "@/lib/db";
 import { getResumeDocumentData } from "@/features/preview/server/queries";
 import type { DomainName } from "@/lib/constants/domains";

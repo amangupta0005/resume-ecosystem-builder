@@ -60,7 +60,7 @@ export async function callLlmStructured<T>(params: {
   }
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 15000);
+  const timeoutId = setTimeout(() => controller.abort(), 30000);
 
   try {
     if (config.provider === "gemini") {

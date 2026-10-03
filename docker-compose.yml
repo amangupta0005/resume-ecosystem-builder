@@ -35,6 +35,9 @@ services:
       - REDIS_URL=redis://redis:6379
       - DATABASE_URL=${DATABASE_URL}
       - APP_PASSCODE=${APP_PASSCODE}
+      - AI_FEATURES_ENABLED=${AI_FEATURES_ENABLED:-true}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-1.5-flash}
     networks:
       - resume-network
 
