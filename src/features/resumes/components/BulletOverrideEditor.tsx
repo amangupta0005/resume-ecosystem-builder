@@ -27,10 +27,44 @@ export function BulletOverrideEditor({
   const [showOriginal, setShowOriginal] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [isAiLoading, setIsAiLoading] = useState(false);
+  const [aiExplanation, setAiExplanation] = useState<string | null>(null);
+
+  async function handleAiSuggest(action: "improve_impact" | "make_concise" | "tailor_to_jd" | "fix_action_verb") {
+    setIsAiLoading(true);
+    setErrorMessage(null);
+
+    try {
+      const res = await fetch("/api/ai/suggest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          resumeConfigId,
+          bulletId: bullet.id,
+          currentText: draftText,
+          action,
+          jobContext: `Target Domain: ${domainName}`,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success && data.data?.suggestedText) {
+        setDraftText(data.data.suggestedText);
+        setAiExplanation(data.data.explanation || null);
+      } else {
+        setErrorMessage(data.error || "Failed to generate AI suggestion.");
+      }
+    } catch {
+      setErrorMessage("Network error while communicating with AI service.");
+    } finally {
+      setIsAiLoading(false);
+    }
+  }
 
   function handleStartEditing() {
     setDraftText(bullet.effectiveText);
     setErrorMessage(null);
+    setAiExplanation(null);
     setIsEditing(true);
   }
 
@@ -117,33 +151,80 @@ export function BulletOverrideEditor({
           value={draftText}
           onChange={(e) => setDraftText(e.target.value)}
           placeholder="Enter customized bullet text tailored for this domain..."
-          disabled={isPending}
+          disabled={isPending || isAiLoading}
           className="w-full rounded-md border border-purple-300 bg-white px-3 py-2 text-sm leading-relaxed text-slate-900 shadow-sm outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-200 disabled:opacity-60"
         />
+
+        {aiExplanation ? (
+          <div className="rounded-md border border-purple-200 bg-purple-50/70 p-2 text-xs text-purple-900">
+            <span className="font-semibold">AI Refinement: </span>
+            {aiExplanation}
+          </div>
+        ) : null}
 
         {errorMessage ? (
           <p className="text-xs font-medium text-red-600">{errorMessage}</p>
         ) : null}
 
-        <div className="flex items-center justify-end gap-2">
-          <button
-            type="button"
-            onClick={handleCancelEditing}
-            disabled={isPending}
-            className="inline-flex h-8 items-center gap-1 rounded-md border border-slate-300 bg-white px-3 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-          >
-            <X size={13} />
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={handleSaveOverride}
-            disabled={isPending}
-            className="inline-flex h-8 items-center gap-1 rounded-md bg-purple-950 px-3 text-xs font-medium text-white hover:bg-purple-900 disabled:opacity-50"
-          >
-            <Check size={13} />
-            {isPending ? "Saving..." : "Save for this Resume"}
-          </button>
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-purple-100">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-[11px] font-semibold text-purple-900 flex items-center gap-1 mr-1">
+              <Sparkles size={11} className="text-purple-600" /> AI Refine:
+            </span>
+            <button
+              type="button"
+              onClick={() => handleAiSuggest("improve_impact")}
+              disabled={isPending || isAiLoading}
+              className="inline-flex h-7 items-center rounded border border-purple-200 bg-white px-2 text-[11px] font-medium text-purple-800 hover:bg-purple-100 transition disabled:opacity-50"
+            >
+              {isAiLoading ? "Processing..." : "Stronger Impact"}
+            </button>
+            <button
+              type="button"
+              onClick={() => handleAiSuggest("make_concise")}
+              disabled={isPending || isAiLoading}
+              className="inline-flex h-7 items-center rounded border border-purple-200 bg-white px-2 text-[11px] font-medium text-purple-800 hover:bg-purple-100 transition disabled:opacity-50"
+            >
+              Make Concise
+            </button>
+            <button
+              type="button"
+              onClick={() => handleAiSuggest("fix_action_verb")}
+              disabled={isPending || isAiLoading}
+              className="inline-flex h-7 items-center rounded border border-purple-200 bg-white px-2 text-[11px] font-medium text-purple-800 hover:bg-purple-100 transition disabled:opacity-50"
+            >
+              Action Verb
+            </button>
+            <button
+              type="button"
+              onClick={() => handleAiSuggest("tailor_to_jd")}
+              disabled={isPending || isAiLoading}
+              className="inline-flex h-7 items-center rounded border border-purple-200 bg-white px-2 text-[11px] font-medium text-purple-800 hover:bg-purple-100 transition disabled:opacity-50"
+            >
+              Tailor to Domain
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleCancelEditing}
+              disabled={isPending || isAiLoading}
+              className="inline-flex h-8 items-center gap-1 rounded-md border border-slate-300 bg-white px-3 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+            >
+              <X size={13} />
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleSaveOverride}
+              disabled={isPending || isAiLoading}
+              className="inline-flex h-8 items-center gap-1 rounded-md bg-purple-950 px-3 text-xs font-medium text-white hover:bg-purple-900 disabled:opacity-50"
+            >
+              <Check size={13} />
+              {isPending ? "Saving..." : "Save for this Resume"}
+            </button>
+          </div>
         </div>
       </div>
     );
