@@ -93,7 +93,7 @@ async function main() {
             spacing: { after: 120 },
             children: [
               new TextRun({
-                text: "The Resume Ecosystem Builder is a Next.js full-stack system designed to manage a centralized catalog of engineering projects and dynamically curate domain-specific, ATS-compliant resumes (AI/ML, Full-Stack, Computer Vision, and IoT+ML) with tailored bullet points, ATS compliance scoring, and direct Word (.docx) export capabilities.",
+                text: "The Resume Ecosystem Builder is an AI-powered full-stack system designed to manage a centralized catalog of engineering projects and dynamically curate domain-specific, ATS-compliant resumes with tailored bullet points, hybrid deterministic-semantic JD matching (Gemini 3.5 Flash), categorized skill-gap analysis, and direct Word (.docx) export capabilities.",
                 font: "Calibri",
                 size: 22,
               }),
@@ -194,6 +194,23 @@ async function main() {
               }),
               new TextRun({
                 text: "Candidate profile editor (Contact, Bio, Skills, Education, Certifications), unified ATS document aggregator, and native .docx export engine adhering to single-column ATS standards.",
+                font: "Calibri",
+                size: 22,
+              }),
+            ],
+          }),
+          new Paragraph({
+            bullet: { level: 0 },
+            spacing: { after: 60 },
+            children: [
+              new TextRun({
+                text: "Module 6 (AI Platform & Hybrid ATS Matching): ",
+                bold: true,
+                font: "Calibri",
+                size: 22,
+              }),
+              new TextRun({
+                text: "Server-side LLM orchestration pairing deterministic regex keyword extraction with Gemini 3.5 Flash for explainable ATS match scores, categorized skill-gap triage (Critical/Important/Nice-to-Have), and in-editor bullet refinement with anti-hallucination guardrails and SHA-256 Redis caching.",
                 font: "Calibri",
                 size: 22,
               }),

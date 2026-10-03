@@ -14,28 +14,29 @@ const realProfile = {
   githubUrl: "https://github.com/aman-coder-005",
   linkedinUrl: "https://linkedin.com/in/aman-gupta-7b352a2a4",
   summary:
-    "Proactive Full-Stack Software Engineer with a strong foundation in Computer Science fundamentals, modern web architectures, and machine learning. Proven track record building high-performance web applications using React, Node.js, Express, and MongoDB, with hands-on experience in AI/ML APIs, data analytics, and cloud tooling.",
-  languages: ["C", "C++", "Java", "Python", "JavaScript", "SQL"],
+    "Proactive Full-Stack Software Engineer with a strong foundation in Computer Science fundamentals, modern distributed architectures, and AI/ML systems. Proven track record building high-performance web applications using Next.js 14, React 18, TypeScript, Node.js, Express, PostgreSQL (Prisma), and Redis, with hands-on experience in LLM APIs (Gemini 3.5 Flash), semantic matching, and cloud tooling.",
+  languages: ["C", "C++", "Java", "Python", "JavaScript", "TypeScript", "SQL"],
   frameworks: [
-    "React",
+    "Next.js 14",
+    "React 18",
     "Node.js",
     "Express",
     "FastAPI",
-    "EJS",
+    "Prisma ORM",
     "Tailwind CSS",
-    "Bootstrap",
     "REST APIs",
     "Vite",
   ],
   tools: [
+    "PostgreSQL",
+    "Redis 7",
+    "Docker",
+    "AWS EC2",
     "MongoDB Atlas",
     "Git",
     "GitHub",
-    "Docker",
-    "VS Code",
     "Postman",
-    "Jenkins",
-    "Tableau",
+    "LLMs (Gemini API)",
     "NumPy",
     "Pandas",
     "Matplotlib",
@@ -120,9 +121,9 @@ const realProjects: ProjectInput[] = [
     ],
   },
   {
-    title: "Resume Ecosystem Builder – Multi-Variant ATS Engine",
+    title: "Resume Ecosystem Builder – AI-Powered ATS & Resume Intelligence Platform",
     description:
-      "Production-grade multi-variant resume builder and ATS intelligence platform featuring real-time keyword parsing, drag-and-drop curation, Redis caching, and automated cloud deployment.",
+      "Production-grade multi-variant resume builder and ATS intelligence platform featuring hybrid deterministic-semantic JD matching with Gemini 3.5 Flash, drag-and-drop curation, Redis 7 caching, and automated AWS EC2 deployment.",
     techStack: [
       "Next.js 14",
       "React 18",
@@ -130,7 +131,9 @@ const realProjects: ProjectInput[] = [
       "Tailwind CSS",
       "Prisma ORM",
       "PostgreSQL",
-      "Redis",
+      "Redis 7",
+      "Gemini 3.5 Flash",
+      "LLMs",
       "Docker",
       "AWS EC2",
       "DuckDNS",
@@ -147,12 +150,16 @@ const realProjects: ProjectInput[] = [
         order: 0,
       },
       {
-        text: "Engineered an atomic PostgreSQL backend via Prisma ORM with negative-index transaction reordering, paired with an in-memory Redis 7 cache and sliding-window rate limiter, reducing query latency by 80%+ and preventing brute-force access",
+        text: "Engineered a hybrid ATS matching engine pairing deterministic regex keyword extraction with server-side Gemini 3.5 Flash LLM analysis, generating explainable match scores, categorized skill gaps (Critical/Important/Nice-to-Have), and in-editor bullet refinement without metric hallucination",
         order: 1,
       },
       {
-        text: "Containerized the full stack into an ultra-lean multi-stage Docker image (~130MB Next.js standalone) and deployed on AWS EC2 Free Tier with 2GB swap, configuring zero-touch systemd boot automation for dynamic DuckDNS domain synchronization",
+        text: "Built an atomic PostgreSQL backend via Prisma ORM with negative-index transaction reordering, backed by an in-memory Redis 7 cache with SHA-256 analysis hashing and sliding-window rate limiters, cutting query latency by 80%+ and preventing brute-force access",
         order: 2,
+      },
+      {
+        text: "Containerized the full stack into an ultra-lean multi-stage Docker image (~130MB Next.js standalone) and deployed on AWS EC2 Free Tier with 2GB swap, configuring zero-touch systemd boot automation for dynamic DuckDNS domain synchronization",
+        order: 3,
       },
     ],
   },
@@ -416,12 +423,12 @@ const realProjects: ProjectInput[] = [
 // Curated 3 top projects per domain
 const DOMAIN_PROJECT_MAPPING: Record<DomainName, string[]> = {
   "All Domains": [
-    "Resume Ecosystem Builder – Multi-Variant ATS Engine",
+    "Resume Ecosystem Builder – AI-Powered ATS & Resume Intelligence Platform",
     "QuickGPT – AI Chatbot Platform",
     "AcadSecure – AI Plagiarism & Collusion Detection",
   ],
   "Full-Stack": [
-    "Resume Ecosystem Builder – Multi-Variant ATS Engine",
+    "Resume Ecosystem Builder – AI-Powered ATS & Resume Intelligence Platform",
     "QuickGPT – AI Chatbot Platform",
     "CryptoStack – Real-Time Crypto Tracker",
   ],
@@ -446,14 +453,14 @@ const DOMAIN_PROJECT_MAPPING: Record<DomainName, string[]> = {
     "Aero Defect AI – Automated Defect Inspection",
   ],
   "Company Full-Stack": [
-    "Resume Ecosystem Builder – Multi-Variant ATS Engine",
+    "Resume Ecosystem Builder – AI-Powered ATS & Resume Intelligence Platform",
     "QuickGPT – AI Chatbot Platform",
     "CryptoStack – Real-Time Crypto Tracker",
   ],
   "Marketing": [
     "Co-Living & Real Estate Micro-Market Study (Independent Research)",
     "CollabTrack – Student Collaboration Platform",
-    "Resume Ecosystem Builder – Multi-Variant ATS Engine",
+    "Resume Ecosystem Builder – AI-Powered ATS & Resume Intelligence Platform",
   ],
 };
 
