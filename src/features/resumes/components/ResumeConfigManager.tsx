@@ -3,7 +3,7 @@
 import { useState, useEffect, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search, SlidersHorizontal, ListFilter, ExternalLink } from "lucide-react";
+import { Search, SlidersHorizontal, ListFilter, ExternalLink, Sparkles } from "lucide-react";
 import { DragDropContext, Droppable, Draggable, type DropResult } from "@hello-pangea/dnd";
 import type { ResumeConfigData, ResumeProjectData, ResumeVariantItem } from "@/features/resumes/server/queries";
 import {
@@ -13,6 +13,7 @@ import {
 } from "@/features/resumes/server/actions";
 import { ResumeProjectCard } from "./ResumeProjectCard";
 import { ResumePreviewPanel } from "./ResumePreviewPanel";
+import { JobMatchModal } from "./JobMatchModal";
 
 type ResumeConfigManagerProps = {
   configData: ResumeConfigData;
@@ -22,6 +23,7 @@ type ResumeConfigManagerProps = {
 export function ResumeConfigManager({ configData, variants }: ResumeConfigManagerProps) {
   const router = useRouter();
   const [isDuplicating, setIsDuplicating] = useState(false);
+  const [isJdModalOpen, setIsJdModalOpen] = useState(false);
   const [projects, setProjects] = useState<ResumeProjectData[]>(configData.projects);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterMode, setFilterMode] = useState<"all" | "included" | "domain-only">("included");
@@ -264,6 +266,14 @@ export function ResumeConfigManager({ configData, variants }: ResumeConfigManage
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setIsJdModalOpen(true)}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-indigo-700 transition"
+          >
+            <Sparkles size={13} />
+            <span>AI JD Match</span>
+          </button>
           <div className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 shadow-xs">
             <span className="font-semibold text-slate-950">{includedProjects.length}</span>{" "}
             projects active
@@ -461,6 +471,14 @@ export function ResumeConfigManager({ configData, variants }: ResumeConfigManage
           />
         </div>
       </div>
+
+      {/* AI Job Description Match & Skill Gap Modal */}
+      <JobMatchModal
+        isOpen={isJdModalOpen}
+        onClose={() => setIsJdModalOpen(false)}
+        resumeConfigId={configData.resumeConfigId}
+        domainName={configData.domainName}
+      />
     </div>
   );
 }

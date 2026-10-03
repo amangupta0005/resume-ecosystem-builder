@@ -1,11 +1,7 @@
 import crypto from "crypto";
 import { ATS_TECH_KEYWORDS, ATS_ACTION_VERBS } from "@/lib/atsHighlighter";
+import { callLlmStructured } from "@/lib/ai/client";
 import {
-  callLlmStructured,
-  isAiEnabled,
-} from "@/lib/ai/client";
-import {
-  JD_EXTRACTION_SYSTEM_PROMPT,
   SKILL_GAP_ANALYSIS_SYSTEM_PROMPT,
   BULLET_SUGGESTION_SYSTEM_PROMPT,
 } from "@/lib/ai/prompts";
@@ -333,7 +329,7 @@ export async function suggestBulletRefinement(params: {
     );
 
     let suggestedText = currentText;
-    let actionVerbUsed = hasStrongVerb ? firstWord : "Engineered";
+    const actionVerbUsed = hasStrongVerb ? firstWord : "Engineered";
     let explanation = "Refined phrasing for active voice and technical clarity.";
 
     if (action === "fix_action_verb" || !hasStrongVerb) {
